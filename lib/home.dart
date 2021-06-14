@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pet_lover/EditProfile.dart';
-import 'package:pet_lover/login.dart';
 import 'package:pet_lover/navigation_bar_screens/account_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/chat_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/following_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/home_nav.dart';
-import 'package:pet_lover/settings.dart';
+
 
 class Home extends StatefulWidget {
   @override
@@ -18,8 +16,8 @@ class _HomeState extends State<Home> {
   final _tabs = [
     HomeNav(),
     FollowingNav(),
-    EditProfileUser(),
-    SettingPage(),
+    ChatNav(),
+    AccountNav(),
   ];
 
   var _pageController = PageController();

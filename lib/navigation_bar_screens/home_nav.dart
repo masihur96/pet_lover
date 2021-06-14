@@ -341,32 +341,6 @@ class _HomeNavState extends State<HomeNav> {
                     ]
                   ),
                 ),
-                Container(
-                  width: size.width*.35,
-                  height: size.width*.045,
-                  //color: Colors.yellow,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding:  EdgeInsets.fromLTRB(size.width*.03, 0.0, size.width*.03, 0.0),
-                        child: Icon(
-                          Icons.favorite_sharp,
-                          color: Colors.red,
-                          size: size.width*.045,
-                        ),
-                      ),
-                      Padding(
-                        padding:  EdgeInsets.fromLTRB(size.width*.01, 0.0, size.width*.03, 0.0),
-                        child: Icon(
-                          Icons.thumb_up_sharp,
-                          color: Colors.red,
-                          size: size.width*.045,
-                        ),
-                      )
-                    ],
-                  )
-                )
                 ]
               ),
             )
