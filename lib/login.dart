@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pet_lover/home.dart';
+import 'package:pet_lover/register.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -8,14 +9,11 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
   TextEditingController _phoneNo = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery
-        .of(context)
-        .size;
+    Size size = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Colors.deepOrange,
@@ -37,7 +35,7 @@ class _LoginState extends State<Login> {
               child: Column(
                 children: [
                   Container(
-                    height: size.height*.20,
+                    height: size.height * .20,
                     width: size.width,
                     child: Stack(
                       children: [
@@ -45,19 +43,20 @@ class _LoginState extends State<Login> {
                           right: 10.0,
                           child: Image.asset(
                             'assets/animal_logo.png',
-                            height: size.height*.20,
-                            width: size.height*.20,
+                            height: size.height * .20,
+                            width: size.height * .20,
                           ),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(20.0, 30.0, 30.0, 0.0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 30.0, 30.0, 0.0),
                               child: Text(
                                 'Pet Lover',
                                 style: TextStyle(
-                                  fontSize: size.width*.10,
+                                  fontSize: size.width * .10,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'MateSC',
@@ -66,11 +65,12 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 0.0, 0.0, 0.0),
                               child: Text(
                                 'A community for pet lovers',
                                 style: TextStyle(
-                                  fontSize: size.width*.035,
+                                  fontSize: size.width * .035,
                                   color: Colors.white,
                                 ),
                               ),
@@ -86,7 +86,7 @@ class _LoginState extends State<Login> {
             Positioned(
               bottom: 0.0,
               child: Container(
-                height: size.height*.65,
+                height: size.height * .65,
                 width: size.width,
                 child: Card(
                   shape: RoundedRectangleBorder(
@@ -100,12 +100,13 @@ class _LoginState extends State<Login> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(30.0, 40.0, 0.0, 0.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(30.0, 40.0, 0.0, 0.0),
                         child: Text(
                           'Login',
                           style: TextStyle(
                             color: Colors.deepOrange,
-                            fontSize: size.width*.06,
+                            fontSize: size.width * .06,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -116,49 +117,52 @@ class _LoginState extends State<Login> {
                           'Get logged in for better experience',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: size.width*.032,
+                            fontSize: size.width * .032,
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
                         child: _textFormBuilder('Your mobile number'),
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
                         child: Text(
                           'Each time you logged in, you will be verified through an OTP sending to your mobile number',
-                          style: TextStyle(
-                            color: Colors.grey
-                          ),
+                          style: TextStyle(color: Colors.grey),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
                         child: Row(
                           children: [
                             Expanded(
                               child: Container(
-                                height: size.width*.13,
+                                height: size.width * .13,
                                 child: ElevatedButton(
-                                  onPressed: (){
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Home()));
                                   },
                                   child: Text(
                                     'LOG IN',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: size.width*.04,
+                                      fontSize: size.width * .04,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   style: ButtonStyle(
-                                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
                                           RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10.0),
-                                          )
-                                      )
-                                  )    ,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ))),
                                 ),
                               ),
                             ),
@@ -169,25 +173,35 @@ class _LoginState extends State<Login> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
+                            padding:
+                                const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
                             child: Text(
                               'Do not have account?',
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: size.width*.032,
+                                fontSize: size.width * .038,
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(3.0, 20.0, 0.0, 0.0),
-                            child: Text(
-                              'Register here',
-                              style: TextStyle(
-                                color: Colors.deepOrange,
-                                fontSize: size.width*.032,
-                                fontWeight: FontWeight.bold,
+                          GestureDetector(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  3.0, 20.0, 0.0, 0.0),
+                              child: Text(
+                                'Register here',
+                                style: TextStyle(
+                                  color: Colors.deepOrange,
+                                  fontSize: size.width * .038,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Register()));
+                            },
                           ),
                         ],
                       )
@@ -210,7 +224,7 @@ class _LoginState extends State<Login> {
                           style: TextStyle(
                             color: Colors.black,
                             fontFamily: 'MateSC',
-                            fontSize: size.width*.04,
+                            fontSize: size.width * .04,
                           ),
                         ),
                       )
@@ -225,7 +239,6 @@ class _LoginState extends State<Login> {
     );
   }
 
-
   Widget _textFormBuilder(String hint) {
     return TextFormField(
       controller: _phoneNo,
@@ -236,7 +249,7 @@ class _LoginState extends State<Login> {
       validator: (value) {
         if (value!.isEmpty)
           return 'Enter $hint';
-        else if(value.length!=11)
+        else if (value.length != 11)
           return 'Mobile number must be of 11 digits';
         else
           return null;
@@ -244,7 +257,7 @@ class _LoginState extends State<Login> {
       decoration: InputDecoration(
         labelText: hint,
         prefixIcon: Icon(
-            Icons.phone_android_outlined,
+          Icons.phone_android_outlined,
           color: Colors.black,
         ),
         border: OutlineInputBorder(

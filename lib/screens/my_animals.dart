@@ -1,58 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/screens/commentSection.dart';
 
-class HomeNav extends StatefulWidget {
+class MyAnimals extends StatefulWidget {
   @override
-  _HomeNavState createState() => _HomeNavState();
+  _MyAnimalsState createState() => _MyAnimalsState();
 }
 
-class _HomeNavState extends State<HomeNav> {
-  TextEditingController _commentController = TextEditingController();
+class _MyAnimalsState extends State<MyAnimals> {
+  List<String> _myAnimalsImages = [
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg',
+    'assets/dog.jpg'
+  ];
+
+  List<String> menuItems = ['Edit', 'Delete'];
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
     return Scaffold(
-        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.grey[200],
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .01),
-                child: posts(context),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    0.0, size.width * .01, 0.0, size.width * .01),
-                child: posts(context),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    0.0, size.width * .01, 0.0, size.width * .01),
-                child: posts(context),
-              ),
-            ],
+        appBar: AppBar(
+          title: Text(
+            'Your Animals',
+            style: TextStyle(
+              color: Colors.black,
+            ),
           ),
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          elevation: 0.0,
+        ),
+        body: ListView(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .02),
+              child: posts(context),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .02),
+              child: posts(context),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .01),
+              child: posts(context),
+            ),
+          ],
         ));
-  }
-
-  Widget _textFormBuilder(String hint) {
-    return TextFormField(
-      controller: _commentController,
-      validator: (value) {
-        if (value!.isEmpty)
-          return 'Enter $hint';
-        else
-          return null;
-      },
-      decoration: InputDecoration(
-        hintText: hint,
-      ),
-      cursorColor: Colors.black,
-    );
   }
 
   Widget posts(BuildContext context) {
@@ -69,7 +77,7 @@ class _HomeNavState extends State<HomeNav> {
                 width: size.width * .8,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(size.width * .02,
-                      size.width * .01, size.width * .02, size.width * .01),
+                      size.width * .02, size.width * .02, size.width * .01),
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -107,6 +115,30 @@ class _HomeNavState extends State<HomeNav> {
                       ]),
                 ),
               ),
+              Container(
+                  alignment: Alignment.centerRight,
+                  width: size.width * .2,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(cardColor: Colors.white),
+                    child: PopupMenuButton(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: Colors.black,
+                        ),
+                        itemBuilder: (context) {
+                          return menuItems.map((String choice) {
+                            return PopupMenuItem(
+                              value: choice,
+                              child: Text(
+                                '$choice',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        }),
+                  ))
             ],
           ),
         ),
@@ -120,58 +152,14 @@ class _HomeNavState extends State<HomeNav> {
               'assets/dog.jpg',
               fit: BoxFit.cover,
             )),
-        Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.heart,
-                size: size.width * .06,
-                color: Colors.black,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .02,
-                  size.width * .02, size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.comment,
-                color: Colors.black,
-                size: size.width * .06,
-              ),
-            ),
-          ],
-        ),
         Container(
             width: size.width,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .01,
-                  size.width * .02, size.width * .01),
+              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .03,
+                  size.width * .02, size.width * .03),
               child: Text(
                   'Here will be the caption of photo. Here will be the caption of photo. Here will be the caption of photo.Here will be the caption of photo.Here will be the caption of photo.'),
             )),
-        ListTile(
-          title: Text(
-            'Add comment...',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
-          ),
-          leading: CircleAvatar(
-            backgroundImage: AssetImage(
-              'assets/profile_image.jpg',
-            ),
-            radius: size.width * .04,
-          ),
-          onTap: () {
-            setState(() {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CommetPage()));
-            });
-          },
-        ),
-        SizedBox(
-          height: size.width * .02,
-        )
       ]),
     );
   }
