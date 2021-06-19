@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/EditProfile.dart';
-import 'package:pet_lover/addAnimal.dart';
-import 'package:pet_lover/screens/my_animals.dart';
+import 'package:pet_lover/sub_screens/EditProfile.dart';
+import 'package:pet_lover/sub_screens/addAnimal.dart';
+import 'package:pet_lover/sub_screens/my_animals.dart';
 
 class AccountNav extends StatefulWidget {
   @override
