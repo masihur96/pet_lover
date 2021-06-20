@@ -41,6 +41,7 @@ class _SearchPageState extends State<SearchPage> {
                     onTap: () {
                       setState(() {
                         _searchController.text = '';
+                        Navigator.pop(context);
                       });
                     },
                     borderRadius: BorderRadius.circular(size.width * .02),
