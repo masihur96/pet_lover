@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pet_lover/demo_designs/animal_post.dart';
 
 class MyAnimals extends StatefulWidget {
   @override
@@ -6,26 +7,12 @@ class MyAnimals extends StatefulWidget {
 }
 
 class _MyAnimalsState extends State<MyAnimals> {
-  List<String> _myAnimalsImages = [
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg',
-    'assets/dog.jpg'
-  ];
-
   List<String> menuItems = ['Edit', 'Delete'];
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-        backgroundColor: Colors.grey[200],
         appBar: AppBar(
           title: Text(
             'Your Animals',
@@ -45,22 +32,56 @@ class _MyAnimalsState extends State<MyAnimals> {
           ),
           elevation: 0.0,
         ),
-        body: ListView(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .02),
-              child: posts(context),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .02),
-              child: posts(context),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .01),
-              child: posts(context),
-            ),
-          ],
-        ));
+        body: _bodyUI(context));
+  }
+
+  Widget _bodyUI(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return Container(
+      width: size.width,
+      child: DefaultTabController(
+          length: 2,
+          child: Column(
+            children: [
+              Container(
+                color: Colors.white,
+                child: TabBar(
+                    labelColor: Colors.deepOrange,
+                    unselectedLabelColor: Colors.black,
+                    tabs: [
+                      Tab(
+                        text: 'My animals',
+                      ),
+                      Tab(
+                        text: 'Shared posts',
+                      )
+                    ]),
+              ),
+              Expanded(
+                child: Container(
+                  child: TabBarView(
+                    children: [
+                      ListView.builder(
+                          itemCount: 4,
+                          physics: ClampingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return posts(context);
+                          }),
+                      ListView.builder(
+                          itemCount: 4,
+                          physics: ClampingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return AnimalPost().postAnimal(context);
+                          }),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          )),
+    );
   }
 
   Widget posts(BuildContext context) {
@@ -69,6 +90,9 @@ class _MyAnimalsState extends State<MyAnimals> {
       width: size.width,
       color: Colors.white,
       child: Column(children: [
+        SizedBox(
+          height: size.width * .03,
+        ),
         Container(
           width: size.width,
           child: Row(

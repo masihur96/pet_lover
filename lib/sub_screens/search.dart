@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/sub_screens/commentSection.dart';
+import 'package:pet_lover/demo_designs/animal_post.dart';
+import 'package:pet_lover/demo_designs/search_bar.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -15,7 +15,6 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       body: SafeArea(child: _bodyUI(context)),
     );
@@ -28,43 +27,52 @@ class _SearchPageState extends State<SearchPage> {
         width: size.width,
         child: Column(
           children: [
-            SizedBox(
-              height: size.width * .04,
-            ),
             Container(
-              width: size.width,
-              child: Row(
-                children: [
-                  Container(
-                      width: size.width * .84, child: _searchBar(context)),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _searchController.text = '';
-                        Navigator.pop(context);
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(size.width * .02),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(size.width * .01,
-                          size.width * .02, size.width * .01, size.width * .02),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: Colors.grey.shade800,
-                          fontSize: size.width * .04,
+                alignment: Alignment.center,
+                width: size.width,
+                height: AppBar().preferredSize.height,
+                child: Center(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: size.width * .1,
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.only(left: size.width * .04),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              Navigator.pop(context);
+                            });
+                          },
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
+                      Container(
+                        width: size.width * .9,
+                        child: SearchBar().showSearchBar(context),
+                      ),
+                    ],
                   ),
-                ],
+                )),
+            // SizedBox(
+            //   height: size.width * .03,
+            // ),
+            Expanded(
+              child: Container(
+                width: size.width,
+                child: ListView.builder(
+                    itemCount: 10,
+                    physics: ClampingScrollPhysics(),
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      return AnimalPost().postAnimal(context);
+                    }),
               ),
-            ),
-            SizedBox(
-              height: size.width * .02,
-            ),
-            _posts(context),
+            )
           ],
         ));
   }
@@ -82,11 +90,7 @@ class _SearchPageState extends State<SearchPage> {
           width: size.width,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(size.width * .2),
-              border: Border.all(color: Colors.grey)
-              // boxShadow: [
-              //   BoxShadow(color: Colors.grey, spreadRadius: 1),
-              // ],
-              ),
+              border: Border.all(color: Colors.grey)),
           child: Padding(
             padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .001,
                 size.width * .03, size.width * .001),
@@ -117,127 +121,6 @@ class _SearchPageState extends State<SearchPage> {
         enabledBorder: InputBorder.none,
       ),
       cursorColor: Colors.black,
-    );
-  }
-
-  Widget _posts(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      width: size.width,
-      color: Colors.white,
-      child: Column(children: [
-        Container(
-          width: size.width,
-          child: Row(
-            children: [
-              Container(
-                width: size.width * .8,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(size.width * .02,
-                      size.width * .01, size.width * .02, size.width * .01),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: size.width * .12,
-                          child: CircleAvatar(
-                            child: Icon(
-                              Icons.person,
-                            ),
-                            radius: 18,
-                          ),
-                        ),
-                        SizedBox(width: size.width * .01),
-                        Container(
-                          width: size.width * .4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Username',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '2 jun 10 2021 February 24',
-                                style: TextStyle(
-                                    //fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                        )
-                      ]),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: size.width * .02,
-        ),
-        Container(
-            width: size.width,
-            height: size.width * .7,
-            child: Image.asset(
-              'assets/dog.jpg',
-              fit: BoxFit.cover,
-            )),
-        Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.heart,
-                size: size.width * .06,
-                color: Colors.black,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .02,
-                  size.width * .02, size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.comment,
-                color: Colors.black,
-                size: size.width * .06,
-              ),
-            ),
-          ],
-        ),
-        Container(
-            width: size.width,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .01,
-                  size.width * .02, size.width * .01),
-              child: Text(
-                  'Here will be the caption of photo. Here will be the caption of photo. Here will be the caption of photo.Here will be the caption of photo.Here will be the caption of photo.'),
-            )),
-        ListTile(
-          title: Text(
-            'Add comment...',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
-          ),
-          leading: CircleAvatar(
-            backgroundImage: AssetImage(
-              'assets/profile_image.jpg',
-            ),
-            radius: size.width * .04,
-          ),
-          onTap: () {
-            setState(() {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CommetPage()));
-            });
-          },
-        ),
-        SizedBox(
-          height: size.width * .02,
-        )
-      ]),
     );
   }
 

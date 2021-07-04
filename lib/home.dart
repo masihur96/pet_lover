@@ -115,11 +115,7 @@ class _HomeState extends State<Home> {
           width: size.width,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(size.width * .2),
-              border: Border.all(color: Colors.grey)
-              // boxShadow: [
-              //   BoxShadow(color: Colors.grey, spreadRadius: 1),
-              // ],
-              ),
+              border: Border.all(color: Colors.grey)),
           child: Padding(
             padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .02,
                 size.width * .03, size.width * .02),

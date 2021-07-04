@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
+import 'package:pet_lover/demo_designs/text_field_demo.dart';
 import 'package:pet_lover/home.dart';
 import 'package:pet_lover/register.dart';
 
@@ -9,184 +11,231 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  TextEditingController _phoneNo = TextEditingController();
+  TextEditingController _mobileNoController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  String? _mobileNoErrorText;
+  String? _passwordErrorText;
+  bool obscureText = true;
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.deepOrange,
       appBar: AppBar(
         elevation: 0.0,
         title: Text(
-          'login',
-        ),
-        leading: Icon(
-          Icons.arrow_back_sharp,
+          'Login',
         ),
       ),
-      body: SafeArea(
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              top: 30.0,
-              child: Column(
-                children: [
-                  Container(
-                    height: size.height * .20,
-                    width: size.width,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: 10.0,
-                          child: Image.asset(
-                            'assets/animal_logo.png',
-                            height: size.height * .20,
-                            width: size.height * .20,
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  20.0, 30.0, 30.0, 0.0),
-                              child: Text(
-                                'Pet Lover',
-                                style: TextStyle(
-                                  fontSize: size.width * .10,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'MateSC',
-                                  //decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  20.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                'A community for pet lovers',
-                                style: TextStyle(
-                                  fontSize: size.width * .035,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0.0,
-              child: Container(
-                height: size.height * .65,
-                width: size.width,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(50.0),
-                      topLeft: Radius.circular(50.0),
-                    ),
-                  ),
-                  margin: EdgeInsets.all(0.0),
+      body: _bodyUI(context),
+    );
+  }
+
+  Widget _bodyUI(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return SafeArea(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: 30.0,
+            child: Column(
+              children: [
+                Container(
+                  width: size.width,
+                  height: size.height * .15,
+                  padding: EdgeInsets.only(bottom: size.width * .06),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(30.0, 40.0, 0.0, 0.0),
-                        child: Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Colors.deepOrange,
-                            fontSize: size.width * .06,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(30.0, 2.0, 0.0, 0.0),
-                        child: Text(
-                          'Get logged in for better experience',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: size.width * .032,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
-                        child: _textFormBuilder('Your mobile number'),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
-                        child: Text(
-                          'Each time you logged in, you will be verified through an OTP sending to your mobile number',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: size.width * .13,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Home()));
-                                  },
-                                  child: Text(
-                                    'LOG IN',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: size.width * .04,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  style: ButtonStyle(
-                                      shape: MaterialStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                          RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ))),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        'Animal Society',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: size.width * .1,
+                            fontFamily: 'MateSC',
+                            fontWeight: FontWeight.bold),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
-                            child: Text(
+                          Icon(FontAwesomeIcons.paw,
+                              size: size.width * .04, color: Colors.white),
+                          SizedBox(width: size.width * .03),
+                          Text(
+                            'A community for pet lovers',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: size.width * .045,
+                            ),
+                          ),
+                          SizedBox(width: size.width * .03),
+                          Icon(FontAwesomeIcons.paw,
+                              size: size.width * .04, color: Colors.white),
+                        ],
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0.0,
+            child: Container(
+              height: size.height * .70,
+              width: size.width,
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(size.width * .15),
+                    topLeft: Radius.circular(size.width * .15),
+                  ),
+                ),
+                margin: EdgeInsets.all(0.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          size.width * .05, size.width * .15, 0.0, 0.0),
+                      child: Text(
+                        'Login',
+                        style: TextStyle(
+                          color: Colors.deepOrange,
+                          fontSize: size.width * .06,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          size.width * .05, size.width * .02, 0.0, 0.0),
+                      child: Text(
+                        'Get logged in for better experience',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: size.width * .032,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: size.width,
+                      padding: EdgeInsets.fromLTRB(
+                          size.width * .05, 20.0, size.width * .05, 0.0),
+                      child: TextFieldBuilder().showtextFormBuilder(
+                          context,
+                          'Mobile number',
+                          Icons.phone_android_outlined,
+                          _mobileNoController,
+                          _mobileNoErrorText,
+                          false,
+                          null),
+                    ),
+                    Container(
+                      width: size.width,
+                      padding: EdgeInsets.fromLTRB(
+                          size.width * .05, 20.0, size.width * .05, 0.0),
+                      child: TextFieldBuilder().showtextFormBuilder(
+                          context,
+                          'Password',
+                          Icons.vpn_key,
+                          _passwordController,
+                          _passwordErrorText,
+                          obscureText,
+                          InkWell(
+                              onTap: () {
+                                setState(() {
+                                  obscureText = !obscureText;
+                                });
+                              },
+                              child: Icon(
+                                obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.deepOrange,
+                              ))),
+                    ),
+                    Container(
+                      width: size.width,
+                      height: size.width * .18,
+                      padding: EdgeInsets.fromLTRB(
+                          size.width * .05, 20.0, size.width * .05, 0.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (!TextFieldValidation()
+                                .mobileNoValidate(_mobileNoController.text)) {
+                              _mobileNoErrorText = 'Invalid mobile number!';
+                              return;
+                            }
+                            if (!TextFieldValidation()
+                                .passwordValidation(_passwordController.text)) {
+                              _passwordErrorText = 'Invalid password!';
+                              return;
+                            }
+                            _mobileNoErrorText = null;
+                            _passwordErrorText = null;
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Home()));
+                          });
+                        },
+                        child: Text(
+                          'LOG IN',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: size.width * .04,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ))),
+                      ),
+                    ),
+                    Container(
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.only(right: size.width * .04),
+                        width: size.width,
+                        child: TextButton(
+                          child: Text(
+                            'Forget password?',
+                            style: TextStyle(
+                              color: Colors.deepOrange,
+                              fontSize: size.width * .038,
+                            ),
+                          ),
+                          onPressed: () {},
+                        )),
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        padding: EdgeInsets.only(
+                          bottom: size.width * .1,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
                               'Do not have account?',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: size.width * .038,
                               ),
                             ),
-                          ),
-                          GestureDetector(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  3.0, 20.0, 0.0, 0.0),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Register()));
+                              },
                               child: Text(
                                 'Register here',
                                 style: TextStyle(
@@ -196,87 +245,17 @@ class _LoginState extends State<Login> {
                                 ),
                               ),
                             ),
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Register()));
-                            },
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 30,
-              child: Container(
-                width: size.width,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(30.0, 0.0, 30.0, 0.0),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          '\u201CUntil one has loved an animal, a part of one\u0027s soul remain unawakened.\u201D - Anatole France',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontFamily: 'MateSC',
-                            fontSize: size.width * .04,
-                          ),
+                          ],
                         ),
-                      )
-                    ],
-                  ),
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _textFormBuilder(String hint) {
-    return TextFormField(
-      controller: _phoneNo,
-      keyboardType: TextInputType.number,
-      inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-      ],
-      validator: (value) {
-        if (value!.isEmpty)
-          return 'Enter $hint';
-        else if (value.length != 11)
-          return 'Mobile number must be of 11 digits';
-        else
-          return null;
-      },
-      decoration: InputDecoration(
-        labelText: hint,
-        prefixIcon: Icon(
-          Icons.phone_android_outlined,
-          color: Colors.black,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          borderSide: BorderSide(
-            color: Colors.deepOrange,
           ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          borderSide: BorderSide(
-            color: Colors.black,
-          ),
-        ),
+        ],
       ),
-      cursorColor: Colors.black,
     );
   }
 }
