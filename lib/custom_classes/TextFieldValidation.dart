@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class TextFieldValidation {
   bool mobileNoValidate(String _mobileNo) {
     if (_mobileNo.length != 11) {
@@ -11,6 +9,22 @@ class TextFieldValidation {
 
   bool passwordValidation(String _password) {
     if (_password.length < 6) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  bool usernameValidation(String _username) {
+    if (_username.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  bool addressValidation(String _address) {
+    if (_address.isEmpty) {
       return false;
     } else {
       return true;

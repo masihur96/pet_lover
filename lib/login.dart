@@ -173,7 +173,8 @@ class _LoginState extends State<Login> {
                             }
                             if (!TextFieldValidation()
                                 .passwordValidation(_passwordController.text)) {
-                              _passwordErrorText = 'Invalid password!';
+                              _passwordErrorText =
+                                  'Password must be of at least 6 digits!';
                               return;
                             }
                             _mobileNoErrorText = null;
@@ -228,6 +229,9 @@ class _LoginState extends State<Login> {
                                 color: Colors.black,
                                 fontSize: size.width * .038,
                               ),
+                            ),
+                            SizedBox(
+                              width: size.width * .02,
                             ),
                             InkWell(
                               onTap: () {
