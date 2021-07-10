@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pet_lover/demo_designs/profile_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountNav extends StatefulWidget {
   @override
@@ -8,9 +9,15 @@ class AccountNav extends StatefulWidget {
 
 class _AccountNavState extends State<AccountNav> {
   @override
+  void initState() {
+    super.initState();
+
+    getProfileInfo();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: Colors.white,
       body: _bodyUI(context),
     );
   }
@@ -28,12 +35,21 @@ class _AccountNavState extends State<AccountNav> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('assets/profile_image.jpg'),
-                    radius: size.width * .2,
+                  Container(
+                    height: size.width * .5,
+                    width: size.width * .5,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.deepOrange,
+                      child: CircleAvatar(
+                          radius: size.width * .245,
+                          backgroundColor: Colors.white,
+                          backgroundImage:
+                              AssetImage('assets/profile_image_demo.png')),
+                    ),
                   ),
                 ],
               ),
+              SizedBox(height: size.width * .02),
               Text(
                 'Gal Gadot',
                 style: TextStyle(
@@ -128,11 +144,18 @@ class _AccountNavState extends State<AccountNav> {
               ProfileOption().showOption(context, 'Groups'),
               ProfileOption().showOption(context, 'My animals'),
               ProfileOption().showOption(context, 'Update account'),
+              ProfileOption().showOption(context, 'Reset password'),
               ProfileOption().showOption(context, 'Logout'),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> getProfileInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentMobileNo = prefs.getString('mobileNo') ?? null;
+    print('Current Mobile no is $currentMobileNo');
   }
 }

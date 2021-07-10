@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pet_lover/custom_classes/DatabaseManager.dart';
 import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
+import 'package:pet_lover/custom_classes/progress_dialog.dart';
 import 'package:pet_lover/demo_designs/text_field_demo.dart';
 import 'package:pet_lover/home.dart';
 import 'package:pet_lover/register.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -170,19 +173,19 @@ class _LoginState extends State<Login> {
                                 .mobileNoValidate(_mobileNoController.text)) {
                               _mobileNoErrorText = 'Invalid mobile number!';
                               return;
+                            } else {
+                              _mobileNoErrorText = null;
                             }
                             if (!TextFieldValidation()
                                 .passwordValidation(_passwordController.text)) {
                               _passwordErrorText =
                                   'Password must be of at least 6 digits!';
                               return;
+                            } else {
+                              _passwordErrorText = null;
                             }
-                            _mobileNoErrorText = null;
-                            _passwordErrorText = null;
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Home()));
+
+                            login(context);
                           });
                         },
                         child: Text(
@@ -261,5 +264,31 @@ class _LoginState extends State<Login> {
         ],
       ),
     );
+  }
+
+  Future<void> login(BuildContext context) async {
+    try {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return ProgressDialog(
+                message: 'Please wait... while we let you logged in.');
+          });
+      if (await DatabaseManager().checkMobileNoPassword(
+              _mobileNoController.text, _passwordController.text) ==
+          true) {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('mobileNo', _mobileNoController.text);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Home()));
+      } else {
+        print('Not registered yet!');
+        Navigator.pop(context);
+      }
+    } catch (error) {
+      Navigator.pop(context);
+      print('Login failed - $error');
+    }
   }
 }

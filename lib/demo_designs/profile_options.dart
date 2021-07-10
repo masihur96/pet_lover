@@ -4,6 +4,7 @@ import 'package:pet_lover/sub_screens/EditProfile.dart';
 import 'package:pet_lover/sub_screens/addAnimal.dart';
 import 'package:pet_lover/sub_screens/groups.dart';
 import 'package:pet_lover/sub_screens/my_animals.dart';
+import 'package:pet_lover/sub_screens/reset_password.dart';
 
 class ProfileOption {
   Widget showOption(BuildContext context, String title) {
@@ -34,10 +35,15 @@ class ProfileOption {
                             Icons.edit,
                             color: Colors.deepOrange,
                           )
-                        : Icon(
-                            Icons.logout,
-                            color: Colors.deepOrange,
-                          ),
+                        : title == 'Reset password'
+                            ? Icon(
+                                Icons.vpn_key,
+                                color: Colors.deepOrange,
+                              )
+                            : Icon(
+                                Icons.logout,
+                                color: Colors.deepOrange,
+                              ),
         trailing: title != 'Logout'
             ? Icon(
                 Icons.chevron_right,
@@ -65,16 +71,25 @@ class ProfileOption {
                               MaterialPageRoute(
                                   builder: (context) => MyAnimals()))
                         }
-                      : title == 'Update account'
+                      : title == 'Reset password'
                           // ignore: unnecessary_statements
                           ? {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => EditProfileUser()))
+                                      builder: (context) => ResetPassword()))
                             }
-                          // ignore: unnecessary_statements
-                          : {};
+                          : title == 'Update account'
+                              // ignore: unnecessary_statements
+                              ? {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditProfileUser()))
+                                }
+                              // ignore: unnecessary_statements
+                              : {};
         });
   }
 }

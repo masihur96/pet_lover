@@ -28,7 +28,7 @@ class ProgressDialog extends StatelessWidget {
             Expanded(
               child: Container(
                 child: Text(
-                  'Please wait while you\'re getting registered...',
+                  '$message',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: size.width * .038,

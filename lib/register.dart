@@ -343,7 +343,8 @@ class _RegisterState extends State<Register> {
                 _addressController.text,
                 DateFormat().add_yMMMd().format(now),
                 'null',
-                _passwordController.text)
+                _passwordController.text,
+                'null')
             .then((value) => {
                   Navigator.push(
                       context,

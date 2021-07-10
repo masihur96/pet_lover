@@ -190,14 +190,4 @@ class _AddAnimalState extends State<AddAnimal> {
       print("image not Selected");
     }
   }
-
-  ElevatedButton buttonUpload() {
-    return ElevatedButton(
-      onPressed: () {
-        //pickImageFromGallery(ImageSource.gallery);
-        _getImage();
-      },
-      child: Text("Photo Upload"),
-    );
-  }
 }

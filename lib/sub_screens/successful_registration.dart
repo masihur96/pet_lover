@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pet_lover/home.dart';
+import 'package:pet_lover/login.dart';
 
 class RegistrationSuccessful extends StatefulWidget {
   const RegistrationSuccessful({Key? key}) : super(key: key);
@@ -71,7 +72,7 @@ class _RegistrationSuccessfulState extends State<RegistrationSuccessful> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(context,
-                      (MaterialPageRoute(builder: (context) => Home())));
+                      (MaterialPageRoute(builder: (context) => Login())));
                 },
                 child: Text(
                   'GET STARTED',
