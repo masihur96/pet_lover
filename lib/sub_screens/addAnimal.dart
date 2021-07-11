@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class AddAnimal extends StatefulWidget {
   @override
@@ -10,14 +9,9 @@ class AddAnimal extends StatefulWidget {
 }
 
 class _AddAnimalState extends State<AddAnimal> {
-  final picker = ImagePicker();
-  File? fileImage;
-  bool isFile = false;
-
-  //var memoryStorage;
-
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -26,168 +20,282 @@ class _AddAnimalState extends State<AddAnimal> {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             "Add Animal",
-            //textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.blueGrey,
-              fontSize: 20,
-              //fontWeight: FontWeight.w500,
+              color: Colors.black,
+              fontSize: size.width * .05,
             ),
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.blueGrey,
+            color: Colors.black,
           ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
-      body: _bodyUI(context),
+      body: bodyUI(context),
     );
   }
 
-  Widget _bodyUI(BuildContext context) {
+  //body demo design
+  Widget bodyUI(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Container(
-      padding: EdgeInsets.only(left: 16, top: 50, right: 16),
-      // child: GestureDetector(
-      //   onTap: () {
-      //     FocusScope.of(context).unfocus();
-      //   },
-      child: ListView(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              //if(fileImage!=null)
-              //buildFileImage(),
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(width: 3, color: Colors.blueGrey),
-                    ),
-                    //alignment: Alignment.topCenter,
-                    height: MediaQuery.of(context).size.width * .7,
-                    width: MediaQuery.of(context).size.width * .7,
-
-                    child: fileImage != null
-                        ? Image.file(fileImage!,
-                            fit: BoxFit.cover,
-                            height: MediaQuery.of(context).size.width * .7,
-                            width: MediaQuery.of(context).size.width * .7)
-                        : Center(
-                            child: Text(
-                              'No image selected.',
-                            ),
-                          ), //Icon(Icons.person)
+      width: size.width,
+      height: size.height,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              //container for image or video loading
+              width: size.width,
+              height: size.width * .7,
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300)),
+              child: Center(
+                child: Text(
+                  'No image or video selected!',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: size.width * .05,
                   ),
-                  IconButton(
-                      onPressed: () {
-                        _getImage();
-                      },
-                      icon: Icon(Icons.camera_alt, color: Colors.blueGrey))
+                ),
+              ),
+            ),
+            SizedBox(
+              height: size.width * .02,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: size.width * .04),
+              child: Row(
+                children: [
+                  ElevatedButton(
+                      //video pick button
+                      onPressed: () {},
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.video_camera_front,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: size.width * .03,
+                          ),
+                          Text(
+                            'Video',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: size.width * .038),
+                          )
+                        ],
+                      )),
+                  SizedBox(
+                    width: size.width * .04,
+                  ),
+                  ElevatedButton(
+                      //image pick button
+                      onPressed: () {},
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.photo_camera,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: size.width * .03,
+                          ),
+                          Text(
+                            'Photo',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: size.width * .038),
+                          )
+                        ],
+                      ))
                 ],
               ),
-              // SizedBox(height: 10),
-              // buttonUpload(),
-              SizedBox(height: 20),
-            ],
-          ),
-
-          SizedBox(height: 30),
-
-          buildTextField("Animal name", "dog", false),
-          buildTextField("Color", "white", false),
-          buildTextField("Genere", "hybrid", false),
-          buildTextField("About animal", "About animal...", false),
-          //buildTextField("P", "about yourself", false),
-          SizedBox(
-            height: 20,
-          ),
-
-          SizedBox(height: 30),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              buttonFunction("CANCEL", Colors.blueGrey),
-              buttonFunction("SAVE", Colors.blueGrey),
-            ],
-          )
-        ],
+            ),
+            Container(
+              width: size.width,
+              padding: EdgeInsets.fromLTRB(size.width * .04, size.width * .06,
+                  size.width * .04, size.width * .04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Animal Details',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: size.width * .05,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: size.width * .05),
+                  Text(
+                    'Pet name',
+                    style: TextStyle(fontSize: size.width * .042),
+                  ),
+                  SizedBox(
+                    height: size.width * .02,
+                  ),
+                  Container(
+                    //textformfield for pet name input
+                    width: size.width,
+                    padding: EdgeInsets.only(
+                        left: size.width * .04,
+                        right: size.width * .04,
+                        top: size.width * .02,
+                        bottom: size.width * .02),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey)),
+                    child: textFormFieldBuilder(TextInputType.text, 1),
+                  ),
+                  SizedBox(
+                    height: size.width * .04,
+                  ),
+                  Text(
+                    'Color',
+                    style: TextStyle(fontSize: size.width * .042),
+                  ),
+                  SizedBox(
+                    height: size.width * .02,
+                  ),
+                  Container(
+                    //textformfield for pet color input
+                    width: size.width,
+                    padding: EdgeInsets.only(
+                        left: size.width * .04,
+                        right: size.width * .04,
+                        top: size.width * .02,
+                        bottom: size.width * .02),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey)),
+                    child: textFormFieldBuilder(TextInputType.text, 1),
+                  ),
+                  SizedBox(
+                    height: size.width * .04,
+                  ),
+                  Text(
+                    'Genus',
+                    style: TextStyle(fontSize: size.width * .042),
+                  ),
+                  SizedBox(
+                    height: size.width * .02,
+                  ),
+                  Container(
+                    //textformfield for genus input
+                    width: size.width,
+                    padding: EdgeInsets.only(
+                        left: size.width * .04,
+                        right: size.width * .04,
+                        top: size.width * .02,
+                        bottom: size.width * .02),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey)),
+                    child: textFormFieldBuilder(TextInputType.text, 1),
+                  ),
+                  SizedBox(
+                    height: size.width * .04,
+                  ),
+                  Text(
+                    'Gender',
+                    style: TextStyle(fontSize: size.width * .042),
+                  ),
+                  SizedBox(
+                    height: size.width * .02,
+                  ),
+                  Container(
+                    //textformfield for gender input
+                    width: size.width,
+                    padding: EdgeInsets.only(
+                        left: size.width * .04,
+                        right: size.width * .04,
+                        top: size.width * .02,
+                        bottom: size.width * .02),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey)),
+                    child: textFormFieldBuilder(TextInputType.text, 1),
+                  ),
+                  SizedBox(
+                    height: size.width * .04,
+                  ),
+                  Text(
+                    'Age',
+                    style: TextStyle(fontSize: size.width * .042),
+                  ),
+                  SizedBox(
+                    height: size.width * .02,
+                  ),
+                  Container(
+                    //textformfield for pet age input
+                    width: size.width,
+                    padding: EdgeInsets.only(
+                        left: size.width * .04,
+                        right: size.width * .04,
+                        top: size.width * .02,
+                        bottom: size.width * .02),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey)),
+                    child: textFormFieldBuilder(TextInputType.text, 1),
+                  ),
+                  SizedBox(
+                    height: size.width * .04,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                          //Cancel button
+                          onPressed: () {},
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: size.width * .038),
+                          )),
+                      SizedBox(
+                        width: size.width * .04,
+                      ),
+                      ElevatedButton(
+                          //save button
+                          onPressed: () {},
+                          child: Text(
+                            'Save',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: size.width * .038),
+                          ))
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget buildTextField(
-      String labelText, String placeHolder, bool isPasswordTextField) {
-    return Padding(
-        padding: EdgeInsets.only(top: 5.0),
-        child: TextField(
-          obscureText: isPasswordTextField,
-          decoration: InputDecoration(
-              suffix: isPasswordTextField
-                  ? IconButton(
-                      onPressed: () {
-                        // _EditProfileUserState ob = new _EditProfileUserState();
-
-                        // ob._showPassword=!ob._showPassword;
-                      },
-                      icon: Icon(
-                        Icons.remove_red_eye,
-                        color: Colors.blueGrey,
-                      ),
-                    )
-                  : null,
-              contentPadding: EdgeInsets.only(top: 3),
-              floatingLabelBehavior: FloatingLabelBehavior.auto,
-              labelText: labelText,
-              // border: OutlineInputBorder(),
-              //hintText: labelText,
-              hintStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-                color: Colors.blueGrey,
-              ),
-              labelStyle: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: Colors.blueGrey,
-              )),
-          cursorColor: Colors.black,
-          maxLines: labelText == 'About animal' ? 5 : 1,
-        ));
-  }
-
-  Widget buttonFunction(String textButtonName, Color color) {
-    return OutlinedButton(
-        onPressed: () {},
-        child: Text(
-          textButtonName,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.2,
-            color: color,
-          ),
-        ));
-  }
-
-  Future _getImage() async {
-    final pickedFile = await picker.getImage(
-        source: ImageSource.gallery, maxHeight: 500, maxWidth: 500);
-
-    if (pickedFile != null) {
-      setState(() {
-        fileImage = File(pickedFile.path);
-      });
-    } else {
-      print("image not Selected");
-    }
+  //textformfile demo design
+  Widget textFormFieldBuilder(TextInputType keyboardType, int maxLine) {
+    return TextFormField(
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+          hintStyle: TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+        ),
+        keyboardType: keyboardType,
+        cursorColor: Colors.black,
+        maxLines: maxLine);
   }
 }

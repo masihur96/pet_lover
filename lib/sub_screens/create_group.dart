@@ -252,7 +252,6 @@ class _CreateGroupState extends State<CreateGroup> {
                     ),
                     Container(
                       height: size.width * .12,
-                      // width: size.width,
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
                         onPressed: () {},
@@ -274,22 +273,18 @@ class _CreateGroupState extends State<CreateGroup> {
   }
 
   Widget textFormFieldBuilder(TextInputType keyboardType, int maxLine) {
-    return Column(
-      children: [
-        TextFormField(
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(color: Colors.grey),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-            ),
-            keyboardType: keyboardType,
-            cursorColor: Colors.black,
-            maxLines: maxLine),
-      ],
-    );
+    return TextFormField(
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+          hintStyle: TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+        ),
+        keyboardType: keyboardType,
+        cursorColor: Colors.black,
+        maxLines: maxLine);
   }
 
   void _cameraGalleryBottomSheet(BuildContext context) {
