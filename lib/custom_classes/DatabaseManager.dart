@@ -26,6 +26,19 @@ class DatabaseManager {
     });
   }
 
+  Future<bool> addAnimalsData(Map<String, String> map) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Animals")
+          .doc(map['id'])
+          .set(map);
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
   Future<void> updateUserInfo(String username, String mobileNo, String address,
       String registrationDate, String profileImageLink, String about) async {
     return await usersCollection.doc(mobileNo).update({
