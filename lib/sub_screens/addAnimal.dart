@@ -7,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pet_lover/custom_classes/DatabaseManager.dart';
-import 'package:pet_lover/custom_classes/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
@@ -105,8 +104,9 @@ class _AddAnimalState extends State<AddAnimal> {
                         width: size.width,
                         height: size.width * .7,
                         alignment: Alignment.topCenter,
-                        child:
-                            _image != null ? Image.file(_image!) : buildVideo())
+                        child: _image != null
+                            ? Image.file(_image!, fit: BoxFit.fill)
+                            : buildVideo())
                     : Text(
                         'No image or video selected!',
                         style: TextStyle(
@@ -547,7 +547,7 @@ class _AddAnimalState extends State<AddAnimal> {
     if (_originalImage != null) {
       _croppedImage = await ImageCropper.cropImage(
           sourcePath: _originalImage.path,
-          aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+          aspectRatio: CropAspectRatio(ratioX: 1, ratioY: .7),
           androidUiSettings: AndroidUiSettings(
             lockAspectRatio: false,
           )).then((value) {
@@ -565,7 +565,7 @@ class _AddAnimalState extends State<AddAnimal> {
     if (_originalImage != null) {
       _croppedImage = await ImageCropper.cropImage(
           sourcePath: _originalImage.path,
-          aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+          aspectRatio: CropAspectRatio(ratioX: 1, ratioY: .7),
           androidUiSettings: AndroidUiSettings(
             lockAspectRatio: false,
           )).then((value) {
