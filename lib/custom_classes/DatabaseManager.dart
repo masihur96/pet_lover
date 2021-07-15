@@ -7,6 +7,9 @@ class DatabaseManager {
   CollectionReference usersCollection =
       FirebaseFirestore.instance.collection('users');
 
+  CollectionReference animalCollection =
+      FirebaseFirestore.instance.collection('Animals');
+
   Future<void> addUser(
       String username,
       String mobileNo,
@@ -26,10 +29,18 @@ class DatabaseManager {
     });
   }
 
-  Future<bool> addAnimalsData(Map<String, String> map) async {
+  Future<bool> addAnimalsData(
+      Map<String, String> map, String _currentMobileNo) async {
     try {
       await FirebaseFirestore.instance
           .collection("Animals")
+          .doc(map['id'])
+          .set(map);
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_currentMobileNo)
+          .collection('my_pets')
           .doc(map['id'])
           .set(map);
 

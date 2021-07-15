@@ -73,7 +73,21 @@ class _MyAnimalsState extends State<MyAnimals> {
                           physics: ClampingScrollPhysics(),
                           shrinkWrap: true,
                           itemBuilder: (context, index) {
-                            return AnimalPost().postAnimal(context);
+                            return AnimalPost().postAnimal(
+                                context,
+                                'assets/profile_image_demo.png',
+                                'username',
+                                '24 july, 2021 11:04 AM',
+                                '11',
+                                '12',
+                                '0',
+                                'abcd',
+                                'abcd',
+                                'abcd',
+                                'abcd',
+                                'abcd',
+                                'abcd',
+                                'abcd');
                           }),
                     ],
                   ),

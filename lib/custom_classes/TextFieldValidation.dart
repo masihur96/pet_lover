@@ -30,4 +30,12 @@ class TextFieldValidation {
       return true;
     }
   }
+
+  bool petNameValidation(String _petName) {
+    if (_petName.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

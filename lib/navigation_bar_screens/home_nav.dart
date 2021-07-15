@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/sub_screens/commentSection.dart';
+import 'package:intl/intl.dart';
+import 'package:pet_lover/demo_designs/animal_post.dart';
+import 'package:pet_lover/model/animal.dart';
+import 'package:pet_lover/provider/animalProvider.dart';
+import 'package:provider/provider.dart';
 
 class HomeNav extends StatefulWidget {
   @override
@@ -8,171 +11,58 @@ class HomeNav extends StatefulWidget {
 }
 
 class _HomeNavState extends State<HomeNav> {
-  TextEditingController _commentController = TextEditingController();
+  int _count = 0;
+  List<Animal> _animalLists = [];
+  String? finalDate;
+
+  Future<void> _customInit(AnimalProvider animalProvider) async {
+    setState(() {
+      _count++;
+    });
+
+    if (animalProvider.animalList.isEmpty) {
+      await animalProvider.getAnimals().then((value) {
+        setState(() {
+          _animalLists = animalProvider.animalList;
+          print(_animalLists);
+        });
+      });
+    } else {
+      setState(() {
+        _animalLists = animalProvider.animalList;
+        print(_animalLists);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
+    if (_count == 0) _customInit(animalProvider);
 
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        //backgroundColor: Colors.grey[200],
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, size.width * .01),
-                child: posts(context),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    0.0, size.width * .01, 0.0, size.width * .01),
-                child: posts(context),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    0.0, size.width * .01, 0.0, size.width * .01),
-                child: posts(context),
-              ),
-            ],
-          ),
-        ));
-  }
-
-  Widget _textFormBuilder(String hint) {
-    return TextFormField(
-      controller: _commentController,
-      validator: (value) {
-        if (value!.isEmpty)
-          return 'Enter $hint';
-        else
-          return null;
+    return ListView.builder(
+      itemCount: _animalLists.length,
+      itemBuilder: (context, index) {
+        DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+            int.parse(_animalLists[index].date!));
+        var format = new DateFormat("yMMMd").add_jm();
+        finalDate = format.format(miliDate);
+        return AnimalPost().postAnimal(
+            context,
+            _animalLists[index].userProfileImage!,
+            _animalLists[index].username!,
+            finalDate!,
+            _animalLists[index].totalFollowings!,
+            _animalLists[index].totalComments!,
+            _animalLists[index].totalShares!,
+            _animalLists[index].petName!,
+            _animalLists[index].genus!,
+            _animalLists[index].gender!,
+            _animalLists[index].age!,
+            _animalLists[index].photo!,
+            _animalLists[index].video!,
+            _animalLists[index].userProfileImage!);
       },
-      decoration: InputDecoration(
-        hintText: hint,
-      ),
-      cursorColor: Colors.black,
-    );
-  }
-
-  Widget posts(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      width: size.width,
-      color: Colors.white,
-      child: Column(children: [
-        Container(
-          width: size.width,
-          child: Row(
-            children: [
-              Container(
-                width: size.width * .8,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(size.width * .02,
-                      size.width * .01, size.width * .02, size.width * .01),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: size.width * .12,
-                          child: CircleAvatar(
-                            child: Icon(
-                              Icons.person,
-                            ),
-                            radius: 18,
-                          ),
-                        ),
-                        SizedBox(width: size.width * .01),
-                        Container(
-                          width: size.width * .4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Username',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '2 jun 10 2021 February 24',
-                                style: TextStyle(
-                                    //fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                        )
-                      ]),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: size.width * .02,
-        ),
-        Container(
-            width: size.width,
-            height: size.width * .7,
-            child: Image.asset(
-              'assets/dog.jpg',
-              fit: BoxFit.cover,
-            )),
-        Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.heart,
-                size: size.width * .06,
-                color: Colors.black,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .02,
-                  size.width * .02, size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.comment,
-                color: Colors.black,
-                size: size.width * .06,
-              ),
-            ),
-          ],
-        ),
-        Container(
-            width: size.width,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .01,
-                  size.width * .02, size.width * .01),
-              child: Text(
-                  'Here will be the caption of photo. Here will be the caption of photo. Here will be the caption of photo.Here will be the caption of photo.Here will be the caption of photo.'),
-            )),
-        ListTile(
-          title: Text(
-            'Add comment...',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
-          ),
-          leading: CircleAvatar(
-            backgroundImage: AssetImage(
-              'assets/profile_image.jpg',
-            ),
-            radius: size.width * .04,
-          ),
-          onTap: () {
-            setState(() {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CommetPage()));
-            });
-          },
-        ),
-        SizedBox(
-          height: size.width * .02,
-        )
-      ]),
     );
   }
 }

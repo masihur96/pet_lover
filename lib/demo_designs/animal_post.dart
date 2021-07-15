@@ -1,60 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pet_lover/sub_screens/commentSection.dart';
+import 'package:video_player/video_player.dart';
 
 class AnimalPost {
-  Widget postAnimal(BuildContext context) {
+  Widget postAnimal(
+      BuildContext context,
+      String profileImageLink,
+      String username,
+      String date,
+      String numberOfLoveReacts,
+      String numberOfComments,
+      String numberOfShares,
+      String petName,
+      String petGenus,
+      String petGender,
+      String petAge,
+      String petImage,
+      String petVideo,
+      String currentUserImage) {
     Size size = MediaQuery.of(context).size;
+    late VideoPlayerController _controller;
+    late Future<void> _initializeVideoPlayerFuture;
+    _controller = VideoPlayerController.network(
+      petVideo,
+    );
+    _initializeVideoPlayerFuture = _controller.initialize();
+
     return Container(
       width: size.width,
       child: Column(children: [
         SizedBox(
-          height: size.width * .03,
+          height: size.width * .04,
         ),
-        Container(
-          width: size.width,
-          child: Row(
+        ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(profileImageLink),
+            radius: size.width * .05,
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: size.width * .8,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(size.width * .02,
-                      size.width * .01, size.width * .02, size.width * .01),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: size.width * .12,
-                          child: CircleAvatar(
-                            child: Icon(
-                              Icons.person,
-                            ),
-                            radius: 18,
-                          ),
-                        ),
-                        SizedBox(width: size.width * .01),
-                        Container(
-                          width: size.width * .4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Username',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '2 jun 10 2021 February 24',
-                                style: TextStyle(
-                                    //fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                        )
-                      ]),
+              Text(
+                username,
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: size.width * .035,
+                    fontWeight: FontWeight.bold),
+              ),
+              Text(
+                date,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: size.width * .035,
                 ),
               ),
             ],
@@ -66,12 +64,38 @@ class AnimalPost {
         Container(
             width: size.width,
             height: size.width * .7,
-            child: Image.asset(
-              'assets/dog.jpg',
-              fit: BoxFit.cover,
-            )),
+            decoration:
+                BoxDecoration(border: Border.all(color: Colors.grey.shade300)),
+            child: Center(
+                child: petImage == ''
+                    ? FutureBuilder(
+                        future: _initializeVideoPlayerFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            return AspectRatio(
+                              aspectRatio: _controller.value.aspectRatio,
+                              child: VideoPlayer(_controller),
+                            );
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        },
+                      )
+                    : Image.network(
+                        petImage,
+                        fit: BoxFit.fill,
+                      ))),
         Row(
           children: [
+            Padding(
+              padding: EdgeInsets.only(left: size.width * .02),
+              child: Text(
+                numberOfLoveReacts,
+                style:
+                    TextStyle(color: Colors.black, fontSize: size.width * .038),
+              ),
+            ),
             InkWell(
               onTap: () {},
               child: Padding(
@@ -81,6 +105,14 @@ class AnimalPost {
                   size: size.width * .06,
                   color: Colors.black,
                 ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: size.width * .04),
+              child: Text(
+                numberOfComments,
+                style:
+                    TextStyle(color: Colors.black, fontSize: size.width * .038),
               ),
             ),
             InkWell(
@@ -93,6 +125,14 @@ class AnimalPost {
                   color: Colors.black,
                   size: size.width * .06,
                 ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: size.width * .04),
+              child: Text(
+                numberOfShares,
+                style:
+                    TextStyle(color: Colors.black, fontSize: size.width * .038),
               ),
             ),
             InkWell(
@@ -111,12 +151,50 @@ class AnimalPost {
         ),
         Container(
             width: size.width,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .01,
-                  size.width * .02, size.width * .01),
-              child: Text(
-                  'Here will be the caption of photo. Here will be the caption of photo. Here will be the caption of photo.Here will be the caption of photo.Here will be the caption of photo.'),
-            )),
+            padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .01,
+                size.width * .02, size.width * .01),
+            child: Column(children: [
+              Row(
+                children: [
+                  Text('Pet name: ',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                  Text(
+                    petName,
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Genus: ',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                  Text(
+                    petGenus,
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Gender: ',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                  Text(
+                    petGender,
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Age: ',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                  Text(
+                    petAge,
+                  ),
+                ],
+              )
+            ])),
         ListTile(
           title: Text(
             'Add comment...',
@@ -125,9 +203,9 @@ class AnimalPost {
             ),
           ),
           leading: CircleAvatar(
-            backgroundImage: AssetImage(
-              'assets/profile_image.jpg',
-            ),
+            backgroundImage: currentUserImage == 'null'
+                ? AssetImage('assets/profile_image_demo.png')
+                : NetworkImage(currentUserImage) as ImageProvider,
             radius: size.width * .04,
           ),
           onTap: () {

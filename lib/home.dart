@@ -33,10 +33,9 @@ class _HomeState extends State<Home> {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        //backgroundColor: Colors.white,
         appBar: PreferredSize(
           child: _currentIndex == 0 ? searchBar(context) : appBarTitle(context),
-          preferredSize: Size.fromHeight(60),
+          preferredSize: AppBar().preferredSize,
         ),
         body: PageView(
           children: _tabs,
@@ -103,8 +102,8 @@ class _HomeState extends State<Home> {
     Size size = MediaQuery.of(context).size;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .02,
-          size.width * .03, size.width * .02),
+      padding: EdgeInsets.fromLTRB(
+          size.width * .1, size.width * .02, size.width * .1, size.width * .02),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -117,8 +116,8 @@ class _HomeState extends State<Home> {
               borderRadius: BorderRadius.circular(size.width * .2),
               border: Border.all(color: Colors.grey)),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .02,
-                size.width * .03, size.width * .02),
+            padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .01,
+                size.width * .03, size.width * .01),
             child: Row(
               children: [
                 Icon(Icons.search, color: Colors.grey, size: size.width * .06),

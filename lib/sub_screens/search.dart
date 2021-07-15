@@ -58,9 +58,6 @@ class _SearchPageState extends State<SearchPage> {
                     ],
                   ),
                 )),
-            // SizedBox(
-            //   height: size.width * .03,
-            // ),
             Expanded(
               child: Container(
                 width: size.width,
@@ -69,7 +66,21 @@ class _SearchPageState extends State<SearchPage> {
                     physics: ClampingScrollPhysics(),
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return AnimalPost().postAnimal(context);
+                      return AnimalPost().postAnimal(
+                          context,
+                          'assets/profile_image_demo.png',
+                          'username',
+                          '24 july, 2021 11:04 AM',
+                          '11',
+                          '12',
+                          '0',
+                          'abcd',
+                          'abcd',
+                          'abcd',
+                          'abcd',
+                          'abcd',
+                          'abcd',
+                          'abcd');
                     }),
               ),
             )

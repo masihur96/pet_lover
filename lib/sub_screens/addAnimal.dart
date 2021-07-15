@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pet_lover/custom_classes/DatabaseManager.dart';
+import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
+import 'package:pet_lover/custom_classes/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -24,8 +24,6 @@ class _AddAnimalState extends State<AddAnimal> {
   TextEditingController _genderController = TextEditingController();
   TextEditingController _ageController = TextEditingController();
 
-  bool _isLoading = false;
-
   File? _file;
 
   File? _image;
@@ -33,7 +31,14 @@ class _AddAnimalState extends State<AddAnimal> {
   String? animalsVideoLink;
   String? imageLink;
   String? _currentMobileNo;
-
+  String? _username;
+  String? _userProfileImage;
+  String dateData = '';
+  String? petNameErrorText;
+  String? colorErrorText;
+  String? genusErrorText;
+  String? genderErrorText;
+  String? ageErrorText;
   File? _croppedImage;
   bool profileImageUploadVisibility = false;
   VideoPlayerController? controller;
@@ -103,6 +108,7 @@ class _AddAnimalState extends State<AddAnimal> {
                     ? Container(
                         width: size.width,
                         height: size.width * .7,
+                        color: Colors.grey.shade300,
                         alignment: Alignment.topCenter,
                         child: _image != null
                             ? Image.file(_image!, fit: BoxFit.fill)
@@ -218,8 +224,8 @@ class _AddAnimalState extends State<AddAnimal> {
                     decoration: BoxDecoration(
                         color: Colors.grey[200],
                         border: Border.all(color: Colors.grey)),
-                    child: textFormFieldBuilder(
-                        TextInputType.text, 1, _petNameController),
+                    child: textFormFieldBuilder(TextInputType.text, 1,
+                        _petNameController, petNameErrorText),
                   ),
                   SizedBox(
                     height: size.width * .04,
@@ -242,8 +248,8 @@ class _AddAnimalState extends State<AddAnimal> {
                     decoration: BoxDecoration(
                         color: Colors.grey[200],
                         border: Border.all(color: Colors.grey)),
-                    child: textFormFieldBuilder(
-                        TextInputType.text, 1, _colorController),
+                    child: textFormFieldBuilder(TextInputType.text, 1,
+                        _colorController, colorErrorText),
                   ),
                   SizedBox(
                     height: size.width * .04,
@@ -266,8 +272,8 @@ class _AddAnimalState extends State<AddAnimal> {
                     decoration: BoxDecoration(
                         color: Colors.grey[200],
                         border: Border.all(color: Colors.grey)),
-                    child: textFormFieldBuilder(
-                        TextInputType.text, 1, _genusController),
+                    child: textFormFieldBuilder(TextInputType.text, 1,
+                        _genusController, genusErrorText),
                   ),
                   SizedBox(
                     height: size.width * .04,
@@ -290,8 +296,8 @@ class _AddAnimalState extends State<AddAnimal> {
                     decoration: BoxDecoration(
                         color: Colors.grey[200],
                         border: Border.all(color: Colors.grey)),
-                    child: textFormFieldBuilder(
-                        TextInputType.text, 1, _genderController),
+                    child: textFormFieldBuilder(TextInputType.text, 1,
+                        _genderController, genderErrorText),
                   ),
                   SizedBox(
                     height: size.width * .04,
@@ -315,7 +321,7 @@ class _AddAnimalState extends State<AddAnimal> {
                         color: Colors.grey[200],
                         border: Border.all(color: Colors.grey)),
                     child: textFormFieldBuilder(
-                        TextInputType.text, 1, _ageController),
+                        TextInputType.text, 1, _ageController, ageErrorText),
                   ),
                   SizedBox(
                     height: size.width * .04,
@@ -338,12 +344,26 @@ class _AddAnimalState extends State<AddAnimal> {
                       ElevatedButton(
                           //save button
                           onPressed: () {
-                            final String uuid = Uuid().v1();
-                            setState(() async {
-                              _currentMobileNo = await getCurrentMobileNo();
-                              uploadData(uuid, _currentMobileNo!);
+                            setState(() {
+                              if (!TextFieldValidation()
+                                  .petNameValidation(_petNameController.text)) {
+                                petNameErrorText = 'What is your pet name?';
+                                return;
+                              } else {
+                                petNameErrorText = null;
+                              }
+
+                              showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return ProgressDialog(
+                                        message:
+                                            'Please wait...Uploading image and saving data.');
+                                  });
+
+                              _uploadData();
                             });
-                            _emptyFildCreator();
                           },
                           child: Text(
                             'Save',
@@ -362,9 +382,21 @@ class _AddAnimalState extends State<AddAnimal> {
     );
   }
 
-  Future<void> uploadData(String uuid, String _currentMobileNo) async {
+  _uploadData() async {
+    _currentMobileNo = await getCurrentMobileNo();
+    String id = _petNameController.text + _currentMobileNo!;
+
+    _username =
+        await DatabaseManager().getUserInfo(_currentMobileNo!, 'username');
+
+    _userProfileImage = await DatabaseManager()
+        .getUserInfo(_currentMobileNo!, 'profileImageLink');
+    await uploadData(id, _currentMobileNo!, _username!, _userProfileImage!);
+  }
+
+  Future<void> uploadData(String uuid, String _currentMobileNo, String username,
+      String userProfileImage) async {
     if (_image != null || _file != null) {
-      setState(() => _isLoading = true);
       firebase_storage.Reference storageReference = firebase_storage
           .FirebaseStorage.instance
           .ref()
@@ -383,7 +415,7 @@ class _AddAnimalState extends State<AddAnimal> {
             setState(() {
               animalsImageLink = downloadUrl;
             });
-            _submitData(uuid, _currentMobileNo);
+            _submitData(uuid, _currentMobileNo, username, userProfileImage);
           });
         });
       } else {
@@ -398,7 +430,7 @@ class _AddAnimalState extends State<AddAnimal> {
             setState(() {
               animalsVideoLink = downloadUrl;
             });
-            _submitData(uuid, _currentMobileNo);
+            _submitData(uuid, _currentMobileNo, username, userProfileImage);
           });
         });
       }
@@ -407,15 +439,13 @@ class _AddAnimalState extends State<AddAnimal> {
     }
   }
 
-  Future<void> _submitData(String uuid, String _currentMobileNo) async {
-    DateTime date = DateTime.now();
-    String dateData = '${date.month}-${date.day}-${date.year}';
-    // if (_petNameController.text.isEmpty) {
-    //   print('Select Name');
-    // } else {
-    // setState(() => _isLoading = true);
+  Future<void> _submitData(String uuid, String _currentMobileNo,
+      String username, String userProfileImage) async {
+    String date = DateTime.now().millisecondsSinceEpoch.toString();
     Map<String, String> map = {
       'petName': _petNameController.text,
+      'username': username,
+      'userProfileImage': userProfileImage,
       'color': _colorController.text,
       'genus': _genusController.text,
       'gender': _genderController.text,
@@ -423,20 +453,18 @@ class _AddAnimalState extends State<AddAnimal> {
       'mobile': _currentMobileNo,
       'photo': _image != null ? animalsImageLink! : '',
       'video': _file != null ? animalsVideoLink! : '',
-      'followers': '',
-      'comments': '',
-      'date': dateData,
+      'date': date,
+      'totalFollowings': '0',
+      'totalComments': '0',
+      'totalShares': '0',
       'id': uuid
     };
-    await DatabaseManager().addAnimalsData(map).then((value) {
+    await DatabaseManager().addAnimalsData(map, _currentMobileNo).then((value) {
       if (value) {
         _emptyFildCreator();
-        //    setState(() => _isLoading = false);
-      } else {
-        //   setState(() => _isLoading = false);
-      }
+      } else {}
     });
-    // }
+    Navigator.pop(context);
   }
 
   _emptyFildCreator() {
@@ -578,7 +606,7 @@ class _AddAnimalState extends State<AddAnimal> {
 
   //textformfile demo design
   Widget textFormFieldBuilder(TextInputType keyboardType, int maxLine,
-      TextEditingController textEditingController) {
+      TextEditingController textEditingController, String? errorText) {
     return TextFormField(
         controller: textEditingController,
         decoration: InputDecoration(
@@ -588,6 +616,7 @@ class _AddAnimalState extends State<AddAnimal> {
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
+          errorText: errorText,
         ),
         keyboardType: keyboardType,
         cursorColor: Colors.black,
