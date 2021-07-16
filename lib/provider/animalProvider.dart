@@ -5,6 +5,10 @@ import 'package:pet_lover/model/animal.dart';
 class AnimalProvider extends ChangeNotifier {
   List<Animal> _animalList = [];
 
+  int _numberOfFollowers = 0;
+
+  get numberOfFollowers => _numberOfFollowers;
+
   get animalList => _animalList;
 
   Future<List<Animal>> getAnimals() async {
@@ -41,5 +45,20 @@ class AnimalProvider extends ChangeNotifier {
       print('Error: $error');
       return [];
     }
+  }
+
+  Future<void> getNumberOfFollowers() async {}
+
+  Future<void> addFollowers(String _animalId, String _currentMobileNo) async {
+    // try {
+    //   await FirebaseFirestore.instance
+    //       .collection('Animals')
+    //       .doc(_animalId)
+    //       .collection('followers')
+    //       .doc(_currentMobileNo)
+
+    // } catch (error) {
+    //   print('Adding followers error = $error');
+    // }
   }
 }

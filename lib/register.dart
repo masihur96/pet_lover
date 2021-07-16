@@ -324,6 +324,7 @@ class _RegisterState extends State<Register> {
   }
 
   Future<void> registerUser(BuildContext context) async {
+    String date = DateTime.now().millisecondsSinceEpoch.toString();
     try {
       showDialog(
           context: context,
@@ -337,14 +338,8 @@ class _RegisterState extends State<Register> {
               .alreadyRegisteredNumber(_mobileNoController.text) ==
           false) {
         await DatabaseManager()
-            .addUser(
-                _usernameController.text,
-                _mobileNoController.text,
-                _addressController.text,
-                DateFormat().add_yMMMd().format(now),
-                'null',
-                _passwordController.text,
-                'null')
+            .addUser(_usernameController.text, _mobileNoController.text,
+                _addressController.text, date, '', _passwordController.text, '')
             .then((value) => {
                   Navigator.push(
                       context,

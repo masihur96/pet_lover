@@ -3,6 +3,7 @@ import 'package:pet_lover/login.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
+import 'package:pet_lover/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -19,7 +20,10 @@ class MyApp extends StatelessWidget {
         SystemUiOverlayStyle(statusBarColor: Colors.black12));
 
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AnimalProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AnimalProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider())
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,

@@ -129,7 +129,7 @@ class _EditProfileUserState extends State<EditProfileUser> {
                     child: CircleAvatar(
                       radius: size.width * .245,
                       backgroundColor: Colors.white,
-                      backgroundImage: imageLink == 'null'
+                      backgroundImage: imageLink == ''
                           ? _image == null
                               ? AssetImage('assets/profile_image_demo.png')
                               : FileImage(_image!) as ImageProvider
@@ -379,6 +379,7 @@ class _EditProfileUserState extends State<EditProfileUser> {
                       setState(() {
                         _updateUserData().then((value) {
                           print('update successful');
+                          Navigator.pop(context);
                           Navigator.pop(context);
                         });
                       });

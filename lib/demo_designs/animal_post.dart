@@ -3,22 +3,86 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pet_lover/sub_screens/commentSection.dart';
 import 'package:video_player/video_player.dart';
 
-class AnimalPost {
-  Widget postAnimal(
-      BuildContext context,
-      String profileImageLink,
-      String username,
-      String date,
-      String numberOfLoveReacts,
-      String numberOfComments,
-      String numberOfShares,
-      String petName,
-      String petGenus,
-      String petGender,
-      String petAge,
-      String petImage,
-      String petVideo,
-      String currentUserImage) {
+class AnimalPost extends StatefulWidget {
+  String profileImageLink;
+  String username;
+  String date;
+  String numberOfLoveReacts;
+  String numberOfComments;
+  String numberOfShares;
+  String petName;
+  String petGenus;
+  String petGender;
+  String petAge;
+  String petImage;
+  String petVideo;
+  String currentUserImage;
+  AnimalPost(
+      {Key? key,
+      required this.profileImageLink,
+      required this.username,
+      required this.date,
+      required this.numberOfLoveReacts,
+      required this.numberOfComments,
+      required this.numberOfShares,
+      required this.petName,
+      required this.petGenus,
+      required this.petGender,
+      required this.petAge,
+      required this.petImage,
+      required this.petVideo,
+      required this.currentUserImage})
+      : super(key: key);
+
+  @override
+  _AnimalPostState createState() => _AnimalPostState(
+      profileImageLink,
+      username,
+      date,
+      numberOfLoveReacts,
+      numberOfComments,
+      numberOfShares,
+      petName,
+      petGenus,
+      petGender,
+      petAge,
+      petImage,
+      petVideo,
+      currentUserImage);
+}
+
+class _AnimalPostState extends State<AnimalPost> {
+  String profileImageLink;
+  String username;
+  String date;
+  String numberOfLoveReacts;
+  String numberOfComments;
+  String numberOfShares;
+  String petName;
+  String petGenus;
+  String petGender;
+  String petAge;
+  String petImage;
+  String petVideo;
+  String currentUserImage;
+
+  _AnimalPostState(
+      this.profileImageLink,
+      this.username,
+      this.date,
+      this.numberOfLoveReacts,
+      this.numberOfComments,
+      this.numberOfShares,
+      this.petName,
+      this.petGenus,
+      this.petGender,
+      this.petAge,
+      this.petImage,
+      this.petVideo,
+      this.currentUserImage);
+  bool _isFollowed = false;
+  @override
+  Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     late VideoPlayerController _controller;
     late Future<void> _initializeVideoPlayerFuture;
@@ -97,14 +161,25 @@ class AnimalPost {
               ),
             ),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  _isFollowed = !_isFollowed;
+                });
+                print('following: $_isFollowed');
+              },
               child: Padding(
                 padding: EdgeInsets.all(size.width * .02),
-                child: Icon(
-                  FontAwesomeIcons.heart,
-                  size: size.width * .06,
-                  color: Colors.black,
-                ),
+                child: _isFollowed == false
+                    ? Icon(
+                        FontAwesomeIcons.heart,
+                        size: size.width * .06,
+                        color: Colors.black,
+                      )
+                    : Icon(
+                        FontAwesomeIcons.solidHeart,
+                        size: size.width * .06,
+                        color: Colors.red,
+                      ),
               ),
             ),
             Padding(
@@ -158,41 +233,54 @@ class AnimalPost {
                 children: [
                   Text('Pet name: ',
                       style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  Text(
-                    petName,
-                  ),
+                          color: Colors.black, fontSize: size.width * .038)),
+                  Text(petName,
+                      style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: size.width * .038)),
                 ],
               ),
-              Row(
-                children: [
-                  Text('Genus: ',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  Text(
-                    petGenus,
-                  ),
-                ],
+              Visibility(
+                visible: petGenus == '' ? false : true,
+                child: Row(
+                  children: [
+                    Text('Genus: ',
+                        style: TextStyle(
+                            color: Colors.black, fontSize: size.width * .038)),
+                    Text(petGenus,
+                        style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: size.width * .038)),
+                  ],
+                ),
               ),
-              Row(
-                children: [
-                  Text('Gender: ',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  Text(
-                    petGender,
-                  ),
-                ],
+              Visibility(
+                visible: petGender == '' ? false : true,
+                child: Row(
+                  children: [
+                    Text('Gender: ',
+                        style: TextStyle(
+                            color: Colors.black, fontSize: size.width * .038)),
+                    Text(petGender,
+                        style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: size.width * .038)),
+                  ],
+                ),
               ),
-              Row(
-                children: [
-                  Text('Age: ',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  Text(
-                    petAge,
-                  ),
-                ],
+              Visibility(
+                visible: petAge == '' ? false : true,
+                child: Row(
+                  children: [
+                    Text('Age: ',
+                        style: TextStyle(
+                            color: Colors.black, fontSize: size.width * .038)),
+                    Text(petAge,
+                        style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: size.width * .038)),
+                  ],
+                ),
               )
             ])),
         ListTile(
@@ -203,7 +291,7 @@ class AnimalPost {
             ),
           ),
           leading: CircleAvatar(
-            backgroundImage: currentUserImage == 'null'
+            backgroundImage: currentUserImage == ''
                 ? AssetImage('assets/profile_image_demo.png')
                 : NetworkImage(currentUserImage) as ImageProvider,
             radius: size.width * .04,
