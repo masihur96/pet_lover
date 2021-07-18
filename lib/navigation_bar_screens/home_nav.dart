@@ -17,14 +17,15 @@ class _HomeNavState extends State<HomeNav> {
   String? finalDate;
   Map<String, String> _currentUserInfoMap = {};
 
-  Future<void> _customInit(
-      AnimalProvider animalProvider, UserProvider userProvider) async {
+  _customInit(AnimalProvider animalProvider, UserProvider userProvider) async {
     setState(() {
       _count++;
     });
 
     await userProvider.getCurrentUserInfo().then((value) {
-      _currentUserInfoMap = userProvider.currentUserMap;
+      setState(() {
+        _currentUserInfoMap = userProvider.currentUserMap;
+      });
     });
 
     await animalProvider.getAnimals().then((value) {
@@ -48,30 +49,18 @@ class _HomeNavState extends State<HomeNav> {
             int.parse(_animalLists[index].date!));
         var format = new DateFormat("yMMMd").add_jm();
         finalDate = format.format(miliDate);
-        // return AnimalPost().postAnimal(
-        //     context,
-        //     _animalLists[index].userProfileImage!,
-        //     _animalLists[index].username!,
-        //     finalDate!,
-        //     _animalLists[index].totalFollowings!,
-        //     _animalLists[index].totalComments!,
-        //     _animalLists[index].totalShares!,
-        //     _animalLists[index].petName!,
-        //     _animalLists[index].genus!,
-        //     _animalLists[index].gender!,
-        //     _animalLists[index].age!,
-        //     _animalLists[index].photo!,
-        //     _animalLists[index].video!,
-        //     _currentUserInfoMap['profileImageLink']!);
 
         return AnimalPost(
             profileImageLink: _animalLists[index].userProfileImage!,
             username: _animalLists[index].username!,
+            mobile: _animalLists[index].mobile!,
             date: finalDate!,
             numberOfLoveReacts: _animalLists[index].totalFollowings!,
             numberOfComments: _animalLists[index].totalComments!,
             numberOfShares: _animalLists[index].totalShares!,
+            petId: _animalLists[index].id!,
             petName: _animalLists[index].petName!,
+            petColor: _animalLists[index].color!,
             petGenus: _animalLists[index].genus!,
             petGender: _animalLists[index].gender!,
             petAge: _animalLists[index].age!,

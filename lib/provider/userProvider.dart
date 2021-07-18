@@ -29,7 +29,7 @@ class UserProvider extends ChangeNotifier {
   Future<String> _getCurrentMobileNo() async {
     final _prefs = await SharedPreferences.getInstance();
     final _currentMobileNo = _prefs.getString('mobileNo') ?? null;
-    print('Current Mobile no is $_currentMobileNo');
+    print('Current Mobile no given by userProvider is $_currentMobileNo');
     return _currentMobileNo!;
   }
 }

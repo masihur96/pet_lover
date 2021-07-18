@@ -1,15 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:pet_lover/model/Comment.dart';
 import 'package:pet_lover/model/animal.dart';
+import 'package:uuid/uuid.dart';
 
 class AnimalProvider extends ChangeNotifier {
   List<Animal> _animalList = [];
-
+  bool _isFollower = false;
   int _numberOfFollowers = 0;
+  List<Comment> _commentList = [];
 
   get numberOfFollowers => _numberOfFollowers;
-
   get animalList => _animalList;
+  get isFollower => _isFollower;
+  get commentList => _commentList;
 
   Future<List<Animal>> getAnimals() async {
     try {
@@ -47,18 +51,149 @@ class AnimalProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getNumberOfFollowers() async {}
+  Future<void> getComments(String petId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(petId)
+          .collection('comments')
+          .get()
+          .then((snapshot) {
+        _commentList.clear();
+        snapshot.docChanges.forEach((element) {
+          Comment comment = Comment(
+              element.doc['commentId'],
+              element.doc['comment'],
+              element.doc['animalOwnerMobileNo'],
+              element.doc['currentUserMobileNo'],
+              element.doc['date'],
+              element.doc['totalLikes']);
+          _commentList.add(comment);
+        });
+      });
+    } catch (error) {
+      print('Getting comments error: $error');
+    }
+  }
 
-  Future<void> addFollowers(String _animalId, String _currentMobileNo) async {
-    // try {
-    //   await FirebaseFirestore.instance
-    //       .collection('Animals')
-    //       .doc(_animalId)
-    //       .collection('followers')
-    //       .doc(_currentMobileNo)
+  Future<void> getNumberOfFollowers(String _animalId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(_animalId)
+          .collection('followers')
+          .get()
+          .then((snapshot) {
+        _numberOfFollowers = snapshot.docs.length;
+      });
+    } catch (error) {
+      print('Number of followers cannot be showed - $error');
+    }
+  }
 
-    // } catch (error) {
-    //   print('Adding followers error = $error');
-    // }
+  Future<void> isFollowerOrNot(
+      String _animalId, String _currentMobileNo) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(_animalId)
+          .collection('followers')
+          .doc(_currentMobileNo)
+          .get()
+          .then((snapshot) {
+        if (snapshot.exists) {
+          _isFollower = true;
+        } else {
+          _isFollower = false;
+        }
+      });
+    } catch (error) {
+      print('is follower? - $error');
+    }
+  }
+
+  Future<void> addFollowers(
+      String _animalId, String _currentMobileNo, String _username) async {
+    Map<String, String> followers = {'username': _username};
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(_animalId)
+          .collection('followers')
+          .doc(_currentMobileNo)
+          .set(followers);
+    } catch (error) {
+      print('Adding followers error = $error');
+    }
+  }
+
+  Future<void> myFollowings(
+      String _currentMobileNo, String mobileNo, String username) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_currentMobileNo)
+          .collection('myFollowings')
+          .doc(mobileNo)
+          .set({'username': username});
+    } catch (error) {
+      print('Cannot add in followings ... error = $error');
+    }
+  }
+
+  Future<void> removeMyFollowings(String currentMobileNo, String mobile) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentMobileNo)
+          .collection('myFollowings')
+          .doc(mobile)
+          .delete();
+      print('deleted object: $mobile');
+    } catch (error) {
+      print(
+          'Cannot delete $mobile from myFollowings of $currentMobileNo = $error');
+    }
+  }
+
+  Future<void> removeFollower(String _animalId, String _currentMobileNo) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(_animalId)
+          .collection('followers')
+          .doc(_currentMobileNo)
+          .delete();
+    } catch (error) {
+      print('Cannot delete follower - $error');
+    }
+  }
+
+  Future<void> addComment(
+      String petId,
+      String commentId,
+      String comment,
+      String animalOwnerMobileNo,
+      String currentUserMobileNo,
+      String date,
+      String totalLikes) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(petId)
+          .collection('comments')
+          .doc(commentId)
+          .set({
+        'commentId': commentId,
+        'comment': comment,
+        'date': date,
+        'animalOwnerMobileNo': animalOwnerMobileNo,
+        'currentUserMobileNo': currentUserMobileNo,
+        'totalLikes': totalLikes
+      });
+    } catch (error) {
+      print('Add comment failed: $error');
+    }
   }
 }

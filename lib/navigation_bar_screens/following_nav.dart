@@ -143,12 +143,7 @@ class _FollowingNavState extends State<FollowingNav> {
             ),
             radius: size.width * .04,
           ),
-          onTap: () {
-            setState(() {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CommetPage()));
-            });
-          },
+          onTap: () {},
         ),
         SizedBox(
           height: size.width * .02,

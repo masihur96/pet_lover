@@ -1,19 +1,56 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:pet_lover/demo_designs/comments.dart';
+import 'package:pet_lover/provider/animalProvider.dart';
+import 'package:pet_lover/provider/userProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CommetPage extends StatefulWidget {
-  const CommetPage({Key? key}) : super(key: key);
+  String id;
+  String animalOwnerMobileNo;
+  CommetPage({Key? key, required this.id, required this.animalOwnerMobileNo})
+      : super(key: key);
 
   @override
-  _CommetPageState createState() => _CommetPageState();
+  _CommetPageState createState() => _CommetPageState(id, animalOwnerMobileNo);
 }
 
 class _CommetPageState extends State<CommetPage> {
   TextEditingController _commentController = TextEditingController();
+  Map<String, String> _currentUserInfoMap = {};
+
+  int _count = 0;
+  String id;
+  String animalOwnerMobileNo;
+  _CommetPageState(this.id, this.animalOwnerMobileNo);
+
+  Future<void> _customInit(UserProvider userProvider) async {
+    setState(() {
+      _count++;
+    });
+    await userProvider.getCurrentUserInfo().then((value) {
+      setState(() {
+        _currentUserInfoMap = userProvider.currentUserMap;
+        print(
+            'The profile image in comment section = ${_currentUserInfoMap['profileImageLink']!}');
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    print('The post id is $id');
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
+    final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
+    if (_count == 0) _customInit(userProvider);
     Size size = MediaQuery.of(context).size;
     AppBar appBar = AppBar();
     double appbar_height = appBar.preferredSize.height;
@@ -43,35 +80,23 @@ class _CommetPageState extends State<CommetPage> {
         height: size.height,
         child: Stack(
           children: [
-            Positioned(
-              bottom: appbar_height,
-              top: 0.0,
-              child: Container(
-                height: size.height - appbar_height,
-                width: size.width,
-                //color: Colors.blue,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                          0.0, size.width * .02, 0.0, size.width * .02),
-                      child: _publicComments(context),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                          0.0, size.width * .02, 0.0, size.width * .02),
-                      child: _publicComments(context),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                          0.0, size.width * .02, 0.0, size.width * .02),
-                      child: _publicComments(context),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('Animals')
+                    .doc(id)
+                    .collection('comments')
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  return new ListView(
+                    children:
+                        snapshot.data!.docs.map((DocumentSnapshot document) {
+                      Map<String, dynamic> data =
+                          document.data() as Map<String, dynamic>;
+                      return CommentsDemo(comment: data['comment']);
+                    }).toList(),
+                  );
+                }),
             Positioned(
               bottom: 0.0,
               child: Container(
@@ -92,49 +117,57 @@ class _CommetPageState extends State<CommetPage> {
                                 padding: EdgeInsets.fromLTRB(
                                     size.width * .03, 0.0, 0.0, 0.0),
                                 child: CircleAvatar(
-                                  child: Icon(
-                                    Icons.person,
-                                  ),
-                                  radius: size.width * .035,
+                                  backgroundImage: (_currentUserInfoMap[
+                                                  'profileImageLink'] ==
+                                              null ||
+                                          _currentUserInfoMap[
+                                                  'profileImageLink'] ==
+                                              '')
+                                      ? AssetImage(
+                                          'assets/profile_image_demo.png')
+                                      : NetworkImage(_currentUserInfoMap[
+                                              'profileImageLink']!)
+                                          as ImageProvider,
+                                  radius: size.width * .04,
                                 ),
                               ),
-                              Padding(
+                              Container(
                                 padding: EdgeInsets.fromLTRB(size.width * .03,
                                     0.0, size.width * .03, 0.0),
-                                child: Container(
-                                  width: size.width * .6,
-                                  child: TextFormField(
-                                    controller: _commentController,
-                                    decoration: InputDecoration(
-                                      hintText: 'Add a comment',
-                                      hintStyle: TextStyle(
-                                        fontSize: size.width * .038,
-                                      ),
-                                      border: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                    ),
-                                    cursorColor: Colors.black,
-                                  ),
-                                ),
+                                width: size.width * .6,
+                                child: _commentField(context),
                               ),
                             ],
                           ),
                         ),
-                        Container(
-                          alignment: Alignment.centerRight,
-                          width: size.width * .2,
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                0.0, 0.0, size.width * .03, 0.0),
-                            child: Text(
-                              'Post',
-                              style: TextStyle(
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: size.width * .038),
-                            ),
+                        TextButton(
+                          onPressed: () {
+                            if (_commentController.text.isEmpty) {
+                              return;
+                            }
+                            final _commentId = Uuid().v4();
+                            String date = DateTime.now()
+                                .millisecondsSinceEpoch
+                                .toString();
+                            animalProvider
+                                .addComment(
+                                    id,
+                                    _commentId,
+                                    _commentController.text,
+                                    animalOwnerMobileNo,
+                                    _currentUserInfoMap['mobileNo']!,
+                                    date,
+                                    '')
+                                .then((value) {
+                              _commentController.clear();
+                            });
+                          },
+                          child: Text(
+                            'Post',
+                            style: TextStyle(
+                                color: Colors.deepOrange,
+                                fontWeight: FontWeight.bold,
+                                fontSize: size.width * .038),
                           ),
                         )
                       ],
@@ -147,88 +180,21 @@ class _CommetPageState extends State<CommetPage> {
     );
   }
 
-  Widget _publicComments(BuildContext context) {
+  Widget _commentField(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Container(
-      width: size.width,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(size.width * .03, 0.0, 0.0, 0.0),
-            child: CircleAvatar(
-              child: Icon(
-                Icons.person,
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(size.width * .03, 0.0, 0.0, 0.0),
-            child: Container(
-              width: size.width * .8,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: size.width * .7,
-                        color: Colors.grey[200],
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                              size.width * .02,
-                              size.width * .02,
-                              size.width * .02,
-                              size.width * .02),
-                          child: Text(
-                            'Here will be the public comments specifically for this porst.one can react also. They can react also if they like the post.',
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        width: size.width * .1,
-                        child: Icon(
-                          Icons.favorite_outline,
-                          size: size.width * .03,
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: size.width * .01,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        '14m',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(
-                        width: size.width * .03,
-                      ),
-                      Text(
-                        '4',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                      Icon(
-                        Icons.favorite_sharp,
-                        size: size.width * .03,
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
+    return TextFormField(
+      controller: _commentController,
+      decoration: InputDecoration(
+        hintText: 'Add a comment',
+        hintStyle: TextStyle(
+          fontSize: size.width * .04,
+        ),
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
       ),
+      cursorColor: Colors.black,
     );
   }
 }

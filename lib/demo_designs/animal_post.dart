@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pet_lover/provider/animalProvider.dart';
+import 'package:pet_lover/provider/userProvider.dart';
 import 'package:pet_lover/sub_screens/commentSection.dart';
-import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
 
 class AnimalPost extends StatefulWidget {
   String profileImageLink;
   String username;
+  String mobile;
   String date;
   String numberOfLoveReacts;
   String numberOfComments;
   String numberOfShares;
+  String petId;
   String petName;
+  String petColor;
   String petGenus;
   String petGender;
   String petAge;
@@ -21,11 +26,14 @@ class AnimalPost extends StatefulWidget {
       {Key? key,
       required this.profileImageLink,
       required this.username,
+      required this.mobile,
       required this.date,
       required this.numberOfLoveReacts,
       required this.numberOfComments,
       required this.numberOfShares,
+      required this.petId,
       required this.petName,
+      required this.petColor,
       required this.petGenus,
       required this.petGender,
       required this.petAge,
@@ -38,11 +46,14 @@ class AnimalPost extends StatefulWidget {
   _AnimalPostState createState() => _AnimalPostState(
       profileImageLink,
       username,
+      mobile,
       date,
       numberOfLoveReacts,
       numberOfComments,
       numberOfShares,
+      petId,
       petName,
+      petColor,
       petGenus,
       petGender,
       petAge,
@@ -54,11 +65,14 @@ class AnimalPost extends StatefulWidget {
 class _AnimalPostState extends State<AnimalPost> {
   String profileImageLink;
   String username;
+  String mobile;
   String date;
   String numberOfLoveReacts;
   String numberOfComments;
   String numberOfShares;
+  String petId;
   String petName;
+  String petColor;
   String petGenus;
   String petGender;
   String petAge;
@@ -69,27 +83,72 @@ class _AnimalPostState extends State<AnimalPost> {
   _AnimalPostState(
       this.profileImageLink,
       this.username,
+      this.mobile,
       this.date,
       this.numberOfLoveReacts,
       this.numberOfComments,
       this.numberOfShares,
+      this.petId,
       this.petName,
+      this.petColor,
       this.petGenus,
       this.petGender,
       this.petAge,
       this.petImage,
       this.petVideo,
       this.currentUserImage);
+
   bool _isFollowed = false;
+  String? _currentMobileNo;
+  String? _username;
+  int count = 0;
+  int _numberOfFollowers = 0;
+
+  Future<void> _customInit(
+      UserProvider userProvider, AnimalProvider animalProvider) async {
+    setState(() {
+      count++;
+    });
+
+    await userProvider.getCurrentUserInfo().then((value) {
+      Map userInfo = userProvider.currentUserMap;
+      _currentMobileNo = userInfo['mobileNo'];
+      _username = userInfo['username'];
+    });
+
+    _getFollowersNumber(animalProvider, petId);
+    _isFollowerOrNot(animalProvider, _currentMobileNo!);
+  }
+
+  _addAnimalOwnerInMyFollowings(AnimalProvider animalProvider,
+      String currentMobileNo, String mobile, String username) async {
+    await animalProvider.myFollowings(currentMobileNo, mobile, username);
+  }
+
+  _isFollowerOrNot(
+      AnimalProvider animalProvider, String currentMobileNo) async {
+    await animalProvider.isFollowerOrNot(petId, currentMobileNo).then((value) {
+      setState(() {
+        _isFollowed = animalProvider.isFollower;
+      });
+    });
+  }
+
+  _getFollowersNumber(AnimalProvider animalProvider, String _animalId) async {
+    await animalProvider.getNumberOfFollowers(_animalId).then((value) {
+      setState(() {
+        _numberOfFollowers = animalProvider.numberOfFollowers;
+      });
+      print('Total followers: $_numberOfFollowers petId = $petId');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
+    if (count == 0) _customInit(userProvider, animalProvider);
     Size size = MediaQuery.of(context).size;
-    late VideoPlayerController _controller;
-    late Future<void> _initializeVideoPlayerFuture;
-    _controller = VideoPlayerController.network(
-      petVideo,
-    );
-    _initializeVideoPlayerFuture = _controller.initialize();
 
     return Container(
       width: size.width,
@@ -99,7 +158,9 @@ class _AnimalPostState extends State<AnimalPost> {
         ),
         ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(profileImageLink),
+            backgroundImage: profileImageLink == ''
+                ? AssetImage('assets/profile_image_demo.png')
+                : NetworkImage(profileImageLink) as ImageProvider,
             radius: size.width * .05,
           ),
           title: Column(
@@ -131,31 +192,16 @@ class _AnimalPostState extends State<AnimalPost> {
             decoration:
                 BoxDecoration(border: Border.all(color: Colors.grey.shade300)),
             child: Center(
-                child: petImage == ''
-                    ? FutureBuilder(
-                        future: _initializeVideoPlayerFuture,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            return AspectRatio(
-                              aspectRatio: _controller.value.aspectRatio,
-                              child: VideoPlayer(_controller),
-                            );
-                          } else {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                        },
-                      )
-                    : Image.network(
-                        petImage,
-                        fit: BoxFit.fill,
-                      ))),
+                child: Image.network(
+              petImage,
+              fit: BoxFit.fill,
+            ))),
         Row(
           children: [
             Padding(
               padding: EdgeInsets.only(left: size.width * .02),
               child: Text(
-                numberOfLoveReacts,
+                _numberOfFollowers.toString(),
                 style:
                     TextStyle(color: Colors.black, fontSize: size.width * .038),
               ),
@@ -164,8 +210,18 @@ class _AnimalPostState extends State<AnimalPost> {
               onTap: () {
                 setState(() {
                   _isFollowed = !_isFollowed;
+
+                  if (_isFollowed == true) {
+                    animalProvider.addFollowers(
+                        petId, _currentMobileNo!, _username!);
+                    _getFollowersNumber(animalProvider, petId);
+                    _addAnimalOwnerInMyFollowings(
+                        animalProvider, _currentMobileNo!, mobile, username);
+                  }
+                  if (_isFollowed == false) {
+                    _getFollowersNumber(animalProvider, petId);
+                  }
                 });
-                print('following: $_isFollowed');
               },
               child: Padding(
                 padding: EdgeInsets.all(size.width * .02),
@@ -191,7 +247,15 @@ class _AnimalPostState extends State<AnimalPost> {
               ),
             ),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CommetPage(
+                              id: petId,
+                              animalOwnerMobileNo: mobile,
+                            )));
+              },
               child: Padding(
                 padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .02,
                     size.width * .02, size.width * .02),
@@ -239,6 +303,20 @@ class _AnimalPostState extends State<AnimalPost> {
                           color: Colors.grey.shade700,
                           fontSize: size.width * .038)),
                 ],
+              ),
+              Visibility(
+                visible: petColor == '' ? false : true,
+                child: Row(
+                  children: [
+                    Text('Color: ',
+                        style: TextStyle(
+                            color: Colors.black, fontSize: size.width * .038)),
+                    Text(petColor,
+                        style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: size.width * .038)),
+                  ],
+                ),
               ),
               Visibility(
                 visible: petGenus == '' ? false : true,
@@ -298,7 +376,12 @@ class _AnimalPostState extends State<AnimalPost> {
           ),
           onTap: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => CommetPage()));
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CommetPage(
+                          id: petId,
+                          animalOwnerMobileNo: mobile,
+                        )));
           },
         ),
         Container(
