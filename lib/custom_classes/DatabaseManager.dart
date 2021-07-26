@@ -139,4 +139,22 @@ class DatabaseManager {
     String data = _snapshot[fieldName];
     return data;
   }
+
+  Future<int> getNumberOfComments(String _animalId) async {
+    int _numberOfComments = 0;
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(_animalId)
+          .collection('comments')
+          .get()
+          .then((snapshot) {
+        _numberOfComments = snapshot.docs.length;
+      });
+      return _numberOfComments;
+    } catch (error) {
+      print('Number of followers cannot be showed - $error');
+      return _numberOfComments;
+    }
+  }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/sub_screens/commentSection.dart';
 
 class FollowingNav extends StatefulWidget {
   @override

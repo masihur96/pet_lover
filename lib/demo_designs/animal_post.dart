@@ -103,6 +103,7 @@ class _AnimalPostState extends State<AnimalPost> {
   String? _username;
   int count = 0;
   int _numberOfFollowers = 0;
+  int _numberOfComments = 0;
 
   Future<void> _customInit(
       UserProvider userProvider, AnimalProvider animalProvider) async {
@@ -116,6 +117,7 @@ class _AnimalPostState extends State<AnimalPost> {
       _username = userInfo['username'];
     });
 
+    _getCommentsNumber(animalProvider, petId);
     _getFollowersNumber(animalProvider, petId);
     _isFollowerOrNot(animalProvider, _currentMobileNo!);
   }
@@ -143,11 +145,21 @@ class _AnimalPostState extends State<AnimalPost> {
     });
   }
 
+  _getCommentsNumber(AnimalProvider animalProvider, String _animalId) async {
+    await animalProvider.getNumberOfComments(_animalId).then((value) {
+      setState(() {
+        _numberOfComments = animalProvider.numberOfComments;
+      });
+      print('Total Comments: $_numberOfComments petId = $petId');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
     if (count == 0) _customInit(userProvider, animalProvider);
+
     Size size = MediaQuery.of(context).size;
 
     return Container(
@@ -241,7 +253,7 @@ class _AnimalPostState extends State<AnimalPost> {
             Padding(
               padding: EdgeInsets.only(left: size.width * .04),
               child: Text(
-                numberOfComments,
+                _numberOfComments.toString(),
                 style:
                     TextStyle(color: Colors.black, fontSize: size.width * .038),
               ),

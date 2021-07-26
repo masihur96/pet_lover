@@ -18,6 +18,7 @@ class _AccountNavState extends State<AccountNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: _bodyUI(context),
     );
   }
@@ -85,7 +86,7 @@ class _AccountNavState extends State<AccountNav> {
                     padding: EdgeInsets.fromLTRB(size.width * .04,
                         size.width * .01, size.width * .04, size.width * .01),
                     child: Card(
-                      //color: Colors.deepOrange,
+                      color: Colors.white,
                       elevation: size.width * .01,
                       child: Padding(
                         padding: EdgeInsets.all(size.width * .04),
@@ -143,9 +144,6 @@ class _AccountNavState extends State<AccountNav> {
               ProfileOption().showOption(context, 'Add animals'),
               ProfileOption().showOption(context, 'Groups'),
               ProfileOption().showOption(context, 'My animals'),
-              ProfileOption().showOption(context, 'Update account'),
-              ProfileOption().showOption(context, 'Reset password'),
-              ProfileOption().showOption(context, 'Logout'),
             ],
           ),
         ),

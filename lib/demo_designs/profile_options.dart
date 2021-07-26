@@ -8,12 +8,11 @@ import 'package:pet_lover/sub_screens/reset_password.dart';
 
 class ProfileOption {
   Widget showOption(BuildContext context, String title) {
+    Size size = MediaQuery.of(context).size;
     return ListTile(
         title: Text(
           '$title',
-          style: TextStyle(
-            color: Colors.black,
-          ),
+          style: TextStyle(color: Colors.black, fontSize: size.width * .04),
         ),
         leading: title == 'Add animals'
             ? Icon(

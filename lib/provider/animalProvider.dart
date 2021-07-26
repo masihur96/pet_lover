@@ -2,23 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pet_lover/model/Comment.dart';
 import 'package:pet_lover/model/animal.dart';
-import 'package:uuid/uuid.dart';
 
 class AnimalProvider extends ChangeNotifier {
   List<Animal> _animalList = [];
   bool _isFollower = false;
   int _numberOfFollowers = 0;
+  int _numberOfComments = 0;
   List<Comment> _commentList = [];
 
   get numberOfFollowers => _numberOfFollowers;
   get animalList => _animalList;
   get isFollower => _isFollower;
   get commentList => _commentList;
+  get numberOfComments => _numberOfComments;
 
   Future<List<Animal>> getAnimals() async {
     try {
       await FirebaseFirestore.instance
           .collection('Animals')
+          .orderBy('date', descending: true)
+          .limit(2)
           .get()
           .then((snapshot) {
         _animalList.clear();
@@ -51,31 +54,6 @@ class AnimalProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getComments(String petId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('Animals')
-          .doc(petId)
-          .collection('comments')
-          .get()
-          .then((snapshot) {
-        _commentList.clear();
-        snapshot.docChanges.forEach((element) {
-          Comment comment = Comment(
-              element.doc['commentId'],
-              element.doc['comment'],
-              element.doc['animalOwnerMobileNo'],
-              element.doc['currentUserMobileNo'],
-              element.doc['date'],
-              element.doc['totalLikes']);
-          _commentList.add(comment);
-        });
-      });
-    } catch (error) {
-      print('Getting comments error: $error');
-    }
-  }
-
   Future<void> getNumberOfFollowers(String _animalId) async {
     try {
       await FirebaseFirestore.instance
@@ -85,6 +63,21 @@ class AnimalProvider extends ChangeNotifier {
           .get()
           .then((snapshot) {
         _numberOfFollowers = snapshot.docs.length;
+      });
+    } catch (error) {
+      print('Number of followers cannot be showed - $error');
+    }
+  }
+
+  Future<void> getNumberOfComments(String _animalId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Animals')
+          .doc(_animalId)
+          .collection('comments')
+          .get()
+          .then((snapshot) {
+        _numberOfComments = snapshot.docs.length;
       });
     } catch (error) {
       print('Number of followers cannot be showed - $error');
@@ -189,7 +182,7 @@ class AnimalProvider extends ChangeNotifier {
         'comment': comment,
         'date': date,
         'animalOwnerMobileNo': animalOwnerMobileNo,
-        'currentUserMobileNo': currentUserMobileNo,
+        'commenter': currentUserMobileNo,
         'totalLikes': totalLikes
       });
     } catch (error) {
