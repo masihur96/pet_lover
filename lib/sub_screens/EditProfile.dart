@@ -16,7 +16,7 @@ class EditProfileUser extends StatefulWidget {
 class _EditProfileUserState extends State<EditProfileUser> {
   final picker = ImagePicker();
   File? _image;
-  File? _croppedImage;
+
   String? profileImageLink;
   bool profileImageUploadVisibility = false;
   String? _currentMobileNo;
@@ -415,7 +415,7 @@ class _EditProfileUserState extends State<EditProfileUser> {
         await ImagePicker().getImage(source: ImageSource.gallery);
 
     if (_originalImage != null) {
-      _croppedImage = await ImageCropper.cropImage(
+      await ImageCropper.cropImage(
           sourcePath: _originalImage.path,
           aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
           androidUiSettings: AndroidUiSettings(
@@ -433,7 +433,7 @@ class _EditProfileUserState extends State<EditProfileUser> {
         await ImagePicker().getImage(source: ImageSource.camera);
 
     if (_originalImage != null) {
-      _croppedImage = await ImageCropper.cropImage(
+      await ImageCropper.cropImage(
           sourcePath: _originalImage.path,
           aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
           androidUiSettings: AndroidUiSettings(

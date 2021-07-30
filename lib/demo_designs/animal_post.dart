@@ -104,6 +104,7 @@ class _AnimalPostState extends State<AnimalPost> {
   int count = 0;
   int _numberOfFollowers = 0;
   int _numberOfComments = 0;
+  int _numberOfShares = 0;
 
   Future<void> _customInit(
       UserProvider userProvider, AnimalProvider animalProvider) async {
@@ -119,6 +120,7 @@ class _AnimalPostState extends State<AnimalPost> {
 
     _getCommentsNumber(animalProvider, petId);
     _getFollowersNumber(animalProvider, petId);
+    _getSharesNumber(animalProvider, petId);
     _isFollowerOrNot(animalProvider, _currentMobileNo!);
   }
 
@@ -130,9 +132,7 @@ class _AnimalPostState extends State<AnimalPost> {
   _isFollowerOrNot(
       AnimalProvider animalProvider, String currentMobileNo) async {
     await animalProvider.isFollowerOrNot(petId, currentMobileNo).then((value) {
-      setState(() {
-        _isFollowed = animalProvider.isFollower;
-      });
+      _isFollowed = animalProvider.isFollower;
     });
   }
 
@@ -141,7 +141,16 @@ class _AnimalPostState extends State<AnimalPost> {
       setState(() {
         _numberOfFollowers = animalProvider.numberOfFollowers;
       });
-      print('Total followers: $_numberOfFollowers petId = $petId');
+      print('$petId has $_numberOfFollowers followers');
+    });
+  }
+
+  _getSharesNumber(AnimalProvider animalProvider, String _animalId) async {
+    await animalProvider.getNumberOfShares(_animalId).then((value) {
+      setState(() {
+        _numberOfShares = animalProvider.numberOfShares;
+      });
+      print('$petId has $numberOfShares shares');
     });
   }
 
@@ -150,7 +159,7 @@ class _AnimalPostState extends State<AnimalPost> {
       setState(() {
         _numberOfComments = animalProvider.numberOfComments;
       });
-      print('Total Comments: $_numberOfComments petId = $petId');
+      print('$petId has $_numberOfComments comments');
     });
   }
 
@@ -281,13 +290,15 @@ class _AnimalPostState extends State<AnimalPost> {
             Padding(
               padding: EdgeInsets.only(left: size.width * .04),
               child: Text(
-                numberOfShares,
+                _numberOfShares.toString(),
                 style:
                     TextStyle(color: Colors.black, fontSize: size.width * .038),
               ),
             ),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                showAlertDialog(context, petId, animalProvider);
+              },
               child: Padding(
                 padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .02,
                     size.width * .02, size.width * .02),
@@ -405,6 +416,52 @@ class _AnimalPostState extends State<AnimalPost> {
           ),
         ),
       ]),
+    );
+  }
+
+  showAlertDialog(
+      BuildContext context, String petId, AnimalProvider animalProvider) {
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Continue"),
+      onPressed: () async {
+        await animalProvider.shareAnimal(petId).then((value) async {
+          setState(() {
+            _getSharesNumber(animalProvider, petId);
+          });
+          Navigator.pop(context);
+          _showToast(context);
+        });
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("Share animal"),
+      content: Text("Do you want to share $petName?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  void _showToast(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: const Text('Animal shared successfully.'),
+      ),
     );
   }
 }

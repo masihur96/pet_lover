@@ -14,6 +14,8 @@ class HomeNav extends StatefulWidget {
 class _HomeNavState extends State<HomeNav> {
   int _count = 0;
   List<Animal> _animalLists = [];
+  ScrollController _scrollController = ScrollController();
+
   String? finalDate;
   Map<String, String> _currentUserInfoMap = {};
 
@@ -23,51 +25,81 @@ class _HomeNavState extends State<HomeNav> {
     });
 
     await userProvider.getCurrentUserInfo().then((value) {
+      _currentUserInfoMap = userProvider.currentUserMap;
+    });
+
+    await animalProvider.getAnimals(3).then((value) {
       setState(() {
-        _currentUserInfoMap = userProvider.currentUserMap;
+        _animalLists = animalProvider.animalList;
+        print('The animal list first time length = ${_animalLists.length}');
+        print(
+            'function _customInit() running and getting animals on homepage\nthe top animal ${_animalLists[0].petName}\nlast animal it gets ${_animalLists[_animalLists.length - 1].petName}');
       });
     });
 
-    await animalProvider.getAnimals().then((value) {
+    _scrollController.addListener(() {
+      if (_scrollController.offset >=
+          _scrollController.position.maxScrollExtent) {
+        print('scrolling max and getting more animals');
+        _getMoreAnimals(animalProvider);
+        print('The animal list length = ${_animalLists.length}');
+      }
+    });
+  }
+
+  _getMoreAnimals(AnimalProvider animalProvider) async {
+    await animalProvider.getMoreAnimals(3).then((value) {
       setState(() {
         _animalLists = animalProvider.animalList;
-        print(_animalLists);
       });
     });
   }
 
+  Future _onRefresh(
+      AnimalProvider animalProvider, UserProvider userProvider) async {
+    _animalLists.clear();
+    _customInit(animalProvider, userProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
     if (_count == 0) _customInit(animalProvider, userProvider);
 
-    return ListView.builder(
-      itemCount: _animalLists.length,
-      itemBuilder: (context, index) {
-        DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
-            int.parse(_animalLists[index].date!));
-        var format = new DateFormat("yMMMd").add_jm();
-        finalDate = format.format(miliDate);
+    return RefreshIndicator(
+      onRefresh: () => _onRefresh(animalProvider, userProvider),
+      child: ListView.builder(
+        controller: _scrollController,
+        shrinkWrap: true,
+        physics: ClampingScrollPhysics(),
+        itemCount: _animalLists.length,
+        itemBuilder: (context, index) {
+          DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+              int.parse(_animalLists[index].date!));
+          var format = new DateFormat("yMMMd").add_jm();
+          finalDate = format.format(miliDate);
 
-        return AnimalPost(
-            profileImageLink: _animalLists[index].userProfileImage!,
-            username: _animalLists[index].username!,
-            mobile: _animalLists[index].mobile!,
-            date: finalDate!,
-            numberOfLoveReacts: _animalLists[index].totalFollowings!,
-            numberOfComments: _animalLists[index].totalComments!,
-            numberOfShares: _animalLists[index].totalShares!,
-            petId: _animalLists[index].id!,
-            petName: _animalLists[index].petName!,
-            petColor: _animalLists[index].color!,
-            petGenus: _animalLists[index].genus!,
-            petGender: _animalLists[index].gender!,
-            petAge: _animalLists[index].age!,
-            petImage: _animalLists[index].photo!,
-            petVideo: _animalLists[index].video!,
-            currentUserImage: _currentUserInfoMap['profileImageLink']!);
-      },
+          return AnimalPost(
+              profileImageLink: _animalLists[index].userProfileImage!,
+              username: _animalLists[index].username!,
+              mobile: _animalLists[index].mobile!,
+              date: finalDate!,
+              numberOfLoveReacts: _animalLists[index].totalFollowings!,
+              numberOfComments: _animalLists[index].totalComments!,
+              numberOfShares: _animalLists[index].totalShares!,
+              petId: _animalLists[index].id!,
+              petName: _animalLists[index].petName!,
+              petColor: _animalLists[index].color!,
+              petGenus: _animalLists[index].genus!,
+              petGender: _animalLists[index].gender!,
+              petAge: _animalLists[index].age!,
+              petImage: _animalLists[index].photo!,
+              petVideo: _animalLists[index].video!,
+              currentUserImage: _currentUserInfoMap['profileImageLink']!);
+        },
+      ),
     );
   }
 }

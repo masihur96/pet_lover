@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pet_lover/custom_classes/progress_dialog.dart';
+import 'package:pet_lover/provider/groupProvider.dart';
+import 'package:pet_lover/provider/userProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateGroup extends StatefulWidget {
   const CreateGroup({Key? key}) : super(key: key);
@@ -18,11 +23,38 @@ class _CreateGroupState extends State<CreateGroup> {
 
   File? _image;
   ImagePicker imagePicker = ImagePicker();
-  String _isNull = '';
+
+  TextEditingController _groupNameController = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+
+  String? _groupNameError;
+  String? _descriptionError;
+  String? _currentMobileNo;
+  int count = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          'Create group',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SafeArea(child: _bodyUI(context)),
     );
   }
@@ -63,9 +95,18 @@ class _CreateGroupState extends State<CreateGroup> {
     }
   }
 
+  Future _customInit(UserProvider userProvider) async {
+    _currentMobileNo = await userProvider.getCurrentMobileNo();
+    setState(() {
+      count++;
+    });
+  }
+
   Widget _bodyUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
+    final GroupProvider groupProvider = Provider.of<GroupProvider>(context);
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
+    if (count == 0) _customInit(userProvider);
     return SingleChildScrollView(
       child: Container(
           width: size.width,
@@ -167,8 +208,10 @@ class _CreateGroupState extends State<CreateGroup> {
                           bottom: size.width * .02),
                       decoration: BoxDecoration(
                           color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(size.width * .02),
                           border: Border.all(color: Colors.grey)),
-                      child: textFormFieldBuilder(TextInputType.text, 1),
+                      child: textFormFieldBuilder(TextInputType.text, 1,
+                          _groupNameController, _groupNameError),
                     ),
                     SizedBox(height: size.width * .04),
                     Row(
@@ -193,8 +236,9 @@ class _CreateGroupState extends State<CreateGroup> {
                         width: size.width,
                         height: size.width * .095,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                        ),
+                            border: Border.all(color: Colors.grey),
+                            borderRadius:
+                                BorderRadius.circular(size.width * .02)),
                         padding: EdgeInsets.only(
                             left: size.width * .04, right: size.width * .04),
                         child: Container(
@@ -244,8 +288,10 @@ class _CreateGroupState extends State<CreateGroup> {
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
                         border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(size.width * .02),
                       ),
-                      child: textFormFieldBuilder(TextInputType.multiline, 6),
+                      child: textFormFieldBuilder(TextInputType.multiline, 6,
+                          _descriptionController, _descriptionError),
                     ),
                     SizedBox(
                       height: size.width * .04,
@@ -254,7 +300,37 @@ class _CreateGroupState extends State<CreateGroup> {
                       height: size.width * .12,
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          setState(() {
+                            String id = Uuid().v4();
+                            if (_groupNameController.text.isEmpty) {
+                              _groupNameError = 'Group name is required!';
+                              return;
+                            }
+                            _groupNameError = null;
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) {
+                                  return ProgressDialog(
+                                      message:
+                                          'Creating group... Please wait.');
+                                });
+                            createGroup(
+                                groupProvider,
+                                _groupNameController.text,
+                                _currentMobileNo!,
+                                _image,
+                                id,
+                                _choosenValue,
+                                _descriptionController.text);
+                          });
+                        },
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(size.width * .02),
+                        ))),
                         child: Text(
                           'Create Group',
                           style: TextStyle(
@@ -272,16 +348,18 @@ class _CreateGroupState extends State<CreateGroup> {
     );
   }
 
-  Widget textFormFieldBuilder(TextInputType keyboardType, int maxLine) {
+  Widget textFormFieldBuilder(TextInputType keyboardType, int maxLine,
+      TextEditingController textEditingController, String? errorText) {
     return TextFormField(
+        controller: textEditingController,
         decoration: InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.zero,
-          hintStyle: TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-        ),
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            hintStyle: TextStyle(color: Colors.grey),
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            errorText: errorText),
         keyboardType: keyboardType,
         cursorColor: Colors.black,
         maxLines: maxLine);
@@ -293,7 +371,8 @@ class _CreateGroupState extends State<CreateGroup> {
         context: context,
         builder: (context) {
           return Container(
-            height: size.width * .3,
+            width: size.width,
+            height: size.height * .2,
             color: Color(0xff737373),
             child: Container(
               decoration: BoxDecoration(
@@ -328,5 +407,17 @@ class _CreateGroupState extends State<CreateGroup> {
             ),
           );
         });
+  }
+
+  Future<void> createGroup(
+      GroupProvider groupProvider,
+      String groupName,
+      String currentMobileNo,
+      File? image,
+      String id,
+      String privacy,
+      String description) async {
+    await groupProvider.createGroup(
+        context, groupName, currentMobileNo, image, id, privacy, description);
   }
 }

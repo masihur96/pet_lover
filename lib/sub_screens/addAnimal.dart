@@ -39,7 +39,7 @@ class _AddAnimalState extends State<AddAnimal> {
   String? genusErrorText;
   String? genderErrorText;
   String? ageErrorText;
-  File? _croppedImage;
+
   bool profileImageUploadVisibility = false;
   VideoPlayerController? controller;
 
@@ -573,7 +573,7 @@ class _AddAnimalState extends State<AddAnimal> {
         await ImagePicker().getImage(source: ImageSource.gallery);
 
     if (_originalImage != null) {
-      _croppedImage = await ImageCropper.cropImage(
+      await ImageCropper.cropImage(
           sourcePath: _originalImage.path,
           aspectRatio: CropAspectRatio(ratioX: 1, ratioY: .7),
           androidUiSettings: AndroidUiSettings(
@@ -591,7 +591,7 @@ class _AddAnimalState extends State<AddAnimal> {
         await ImagePicker().getImage(source: ImageSource.camera);
 
     if (_originalImage != null) {
-      _croppedImage = await ImageCropper.cropImage(
+      await ImageCropper.cropImage(
           sourcePath: _originalImage.path,
           aspectRatio: CropAspectRatio(ratioX: 1, ratioY: .7),
           androidUiSettings: AndroidUiSettings(

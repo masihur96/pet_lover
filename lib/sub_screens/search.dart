@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pet_lover/demo_designs/animal_post.dart';
 import 'package:pet_lover/demo_designs/search_bar.dart';
 
 class SearchPage extends StatefulWidget {
