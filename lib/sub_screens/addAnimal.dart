@@ -52,17 +52,7 @@ class _AddAnimalState extends State<AddAnimal> {
     return _currentMobileNo;
   }
 
-  // //  @override
-  // // void dispose() {
-  // //   _scrollController.dispose();
-  // //   super.dispose();
-  // // }
 
-  // @override
-  // void dispose() {
-  //   controller!.dispose();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
