@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SearchBar {
   Widget showSearchBar(BuildContext context) {
     TextEditingController _searchController = TextEditingController();
     Size size = MediaQuery.of(context).size;
-    double _searchBarHeight = AppBar().preferredSize.height;
     return Container(
       width: size.width * .8,
       padding: EdgeInsets.only(left: size.width * .02, right: size.width * .04),

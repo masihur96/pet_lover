@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pet_lover/demo_designs/comments.dart';
+import 'package:pet_lover/model/Comment.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +27,8 @@ class _CommetPageState extends State<CommetPage> {
   String id;
   String animalOwnerMobileNo;
   _CommetPageState(this.id, this.animalOwnerMobileNo);
+
+  List<Comment> commentList = [];
 
   Future<void> _customInit(UserProvider userProvider) async {
     setState(() {
@@ -85,17 +88,33 @@ class _CommetPageState extends State<CommetPage> {
                     .collection('Animals')
                     .doc(id)
                     .collection('comments')
+                    .orderBy('date', descending: true)
                     .snapshots(),
                 builder: (BuildContext context,
                     AsyncSnapshot<QuerySnapshot> snapshot) {
-                  return new ListView(
-                    children:
-                        snapshot.data!.docs.map((DocumentSnapshot document) {
-                      Map<String, dynamic> data =
-                          document.data() as Map<String, dynamic>;
-                      return CommentsDemo(comment: data['comment']);
-                    }).toList(),
-                  );
+                  return snapshot.data == null
+                      ? Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                          physics: ClampingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: snapshot.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            var comments = snapshot.data!.docs;
+
+                            Comment comment = Comment(
+                                id: comments[index]['commentId'],
+                                comment: comments[index]['comment'],
+                                animalOwnerMobileNo: comments[index]
+                                    ['animalOwnerMobileNo'],
+                                currentUserMobileNo: comments[index]
+                                    ['commenter'],
+                                date: comments[index]['date'],
+                                totalLikes: comments[index]['totalLikes']);
+
+                            return CommentsDemo(
+                              comment: comment,
+                            );
+                          });
                 }),
             Positioned(
               bottom: 0.0,
@@ -145,6 +164,7 @@ class _CommetPageState extends State<CommetPage> {
                             if (_commentController.text.isEmpty) {
                               return;
                             }
+
                             final _commentId = Uuid().v4();
                             String date = DateTime.now()
                                 .millisecondsSinceEpoch

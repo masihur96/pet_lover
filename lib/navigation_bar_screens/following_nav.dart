@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/sub_screens/commentSection.dart';
 
 class FollowingNav extends StatefulWidget {
   @override
@@ -8,8 +7,6 @@ class FollowingNav extends StatefulWidget {
 }
 
 class _FollowingNavState extends State<FollowingNav> {
-  TextEditingController _commentController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,22 +15,6 @@ class _FollowingNavState extends State<FollowingNav> {
         posts(context),
       ],
     ));
-  }
-
-  Widget _textFormBuilder(String hint) {
-    return TextFormField(
-      controller: _commentController,
-      validator: (value) {
-        if (value!.isEmpty)
-          return 'Enter $hint';
-        else
-          return null;
-      },
-      decoration: InputDecoration(
-        hintText: hint,
-      ),
-      cursorColor: Colors.black,
-    );
   }
 
   Widget posts(BuildContext context) {

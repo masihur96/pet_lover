@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pet_lover/home.dart';
 import 'package:pet_lover/login.dart';
 
 class RegistrationSuccessful extends StatefulWidget {

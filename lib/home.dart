@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pet_lover/demo_designs/navigaitonDrawer.dart';
 import 'package:pet_lover/navigation_bar_screens/account_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/chat_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/following_nav.dart';
@@ -21,21 +22,32 @@ class _HomeState extends State<Home> {
   ];
 
   bool _titleVisibility = true;
-  bool _profileImageVisibility = false;
-  String _appbarTitle = 'Pet Lover';
+  String _appbarTitle = '';
 
   var _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.white,
+        drawerEnableOpenDragGesture: false,
         resizeToAvoidBottomInset: false,
-        appBar: PreferredSize(
-          child: _currentIndex == 0 ? searchBar(context) : appBarTitle(context),
-          preferredSize: AppBar().preferredSize,
+        drawer: NavigationDrawer(),
+        appBar: AppBar(
+          leading: Builder(builder: (context) {
+            return IconButton(
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ));
+          }),
+          title: _currentIndex == 0 ? searchBar(context) : appBarTitle(context),
+          backgroundColor: Colors.white,
+          elevation: 0,
         ),
         body: PageView(
           children: _tabs,
@@ -44,11 +56,12 @@ class _HomeState extends State<Home> {
               _currentIndex = index;
               if (_currentIndex == 2) {
                 _appbarTitle = 'Conversation';
-                _profileImageVisibility = true;
+              } else if (_currentIndex == 1) {
+                _appbarTitle = 'Favourite';
+              } else if (_currentIndex == 3) {
+                _appbarTitle = 'Account';
               } else {
                 _titleVisibility = true;
-                _profileImageVisibility = false;
-                _appbarTitle = 'Pet Lover';
               }
             });
           },
@@ -79,13 +92,16 @@ class _HomeState extends State<Home> {
                 _currentIndex = index;
                 if (_currentIndex == 2) {
                   _appbarTitle = 'Conversation';
-                  _profileImageVisibility = true;
                 } else if (_currentIndex == 0) {
                   _titleVisibility = false;
-                } else {
+                } else if (_currentIndex == 1) {
                   _titleVisibility = true;
-                  _profileImageVisibility = false;
-                  _appbarTitle = 'Pet Lover';
+
+                  _appbarTitle = 'Favourite';
+                } else if (_currentIndex == 3) {
+                  _titleVisibility = true;
+
+                  _appbarTitle = 'Account';
                 }
                 _pageController.animateToPage(_currentIndex,
                     duration: Duration(milliseconds: 100),
@@ -102,8 +118,7 @@ class _HomeState extends State<Home> {
     Size size = MediaQuery.of(context).size;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-          size.width * .1, size.width * .02, size.width * .1, size.width * .02),
+      padding: EdgeInsets.only(left: size.width * .04),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -122,7 +137,7 @@ class _HomeState extends State<Home> {
               children: [
                 Icon(Icons.search, color: Colors.grey, size: size.width * .06),
                 SizedBox(
-                  width: size.width * .03,
+                  width: size.width * .04,
                 ),
                 Text(
                   'Search',
@@ -138,33 +153,13 @@ class _HomeState extends State<Home> {
   }
 
   Widget appBarTitle(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .03,
-          size.width * .03, size.width * .03),
-      child: Row(
-        children: [
-          Visibility(
-            visible: _profileImageVisibility,
-            child: CircleAvatar(
-              backgroundImage: AssetImage(
-                'assets/profile_image.jpg',
-              ),
-            ),
-          ),
-          SizedBox(
-            width: size.width * .02,
-          ),
-          Visibility(
-            visible: _titleVisibility,
-            child: Text('$_appbarTitle',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'MateSC',
-                    fontSize: size.width * .038)),
-          ),
-        ],
-      ),
+    return Visibility(
+      visible: _titleVisibility,
+      child: Text('$_appbarTitle',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'MateSC',
+          )),
     );
   }
 }

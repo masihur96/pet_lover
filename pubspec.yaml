@@ -69,6 +69,7 @@ flutter:
     - dog.jpg
     - profile_image.jpg
     - profile_image_demo.png
+    - group_icon.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

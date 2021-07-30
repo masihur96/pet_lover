@@ -4,7 +4,6 @@ import 'package:pet_lover/custom_classes/DatabaseManager.dart';
 import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
 import 'package:pet_lover/custom_classes/progress_dialog.dart';
 import 'package:pet_lover/login.dart';
-import 'package:intl/intl.dart';
 import 'package:pet_lover/sub_screens/successful_registration.dart';
 import 'demo_designs/text_field_demo.dart';
 
