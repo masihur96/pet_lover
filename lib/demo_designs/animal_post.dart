@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pet_lover/fade_animation.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
 import 'package:pet_lover/sub_screens/commentSection.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 class AnimalPost extends StatefulWidget {
   String profileImageLink;
@@ -143,6 +145,33 @@ class _AnimalPostState extends State<AnimalPost> {
     });
   }
 
+  VideoPlayerController? controller;
+
+  bool isVisible = true;
+
+  Widget? videoStatusAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = VideoPlayerController.network(petVideo)
+      ..addListener(() => setState(() {}))
+      ..setLooping(true)
+      ..initialize().then((_) => controller!.play());
+  }
+
+  @override
+  void dispose() {
+    if (this.mounted) {
+      setState(() {
+        controller!.dispose();
+      });
+    }
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
@@ -187,15 +216,64 @@ class _AnimalPostState extends State<AnimalPost> {
           height: size.width * .02,
         ),
         Container(
-            width: size.width,
-            height: size.width * .7,
-            decoration:
-                BoxDecoration(border: Border.all(color: Colors.grey.shade300)),
-            child: Center(
-                child: Image.network(
-              petImage,
-              fit: BoxFit.fill,
-            ))),
+          width: size.width,
+          height: size.width * .7,
+          decoration:
+              BoxDecoration(border: Border.all(color: Colors.grey.shade300)),
+          child: petImage != ''
+              ? Center(
+                  child: Image.network(
+                  petImage,
+                  fit: BoxFit.fill,
+                ))
+              : Container(
+                  width: size.width,
+                  child: controller!.value.isInitialized
+                      ? Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            AspectRatio(
+                              aspectRatio: controller!.value.aspectRatio,
+                              child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isVisible = !isVisible;
+                                    });
+
+                                    if (!controller!.value.isInitialized) {
+                                      return;
+                                    }
+                                    if (controller!.value.isPlaying) {
+                                      videoStatusAnimation = FadeAnimation(
+                                          child: const Icon(Icons.pause,
+                                              size: 100.0));
+                                      controller!.pause();
+                                    } else {
+                                      videoStatusAnimation = FadeAnimation(
+                                          child: const Icon(Icons.play_arrow,
+                                              size: 100.0));
+                                      controller!.play();
+                                    }
+                                  },
+                                  child: VideoPlayer(controller!)),
+                            ),
+                            Positioned.fill(
+                                child: Stack(
+                              children: <Widget>[
+                                Center(child: videoStatusAnimation),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: buildIndicator(),
+                                ),
+                              ],
+                            ))
+                          ],
+                        )
+                      : Container(),
+                ),
+        ),
         Row(
           children: [
             Padding(
@@ -395,4 +473,9 @@ class _AnimalPostState extends State<AnimalPost> {
       ]),
     );
   }
+
+  Widget buildIndicator() => VideoProgressIndicator(
+        controller!,
+        allowScrubbing: true,
+      );
 }
