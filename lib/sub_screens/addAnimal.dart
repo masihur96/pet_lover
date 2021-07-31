@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pet_lover/custom_classes/DatabaseManager.dart';
 import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
 import 'package:pet_lover/custom_classes/progress_dialog.dart';
+import 'package:pet_lover/video_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -24,9 +25,10 @@ class _AddAnimalState extends State<AddAnimal> {
   TextEditingController _genderController = TextEditingController();
   TextEditingController _ageController = TextEditingController();
 
-  File? _file;
+  File? fileMedia;
 
   File? _image;
+
   String? animalsImageLink;
   String? animalsVideoLink;
   String? imageLink;
@@ -50,12 +52,7 @@ class _AddAnimalState extends State<AddAnimal> {
     return _currentMobileNo;
   }
 
-  @override
-  void dispose() {
-    controller?.dispose();
 
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +101,7 @@ class _AddAnimalState extends State<AddAnimal> {
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade300)),
               child: Center(
-                child: _image != null || _file != null
+                child: _image != null || fileMedia != null
                     ? Container(
                         width: size.width,
                         height: size.width * .7,
@@ -112,7 +109,7 @@ class _AddAnimalState extends State<AddAnimal> {
                         alignment: Alignment.topCenter,
                         child: _image != null
                             ? Image.file(_image!, fit: BoxFit.fill)
-                            : buildVideo())
+                            : VideoWidget(fileMedia!))
                     : Text(
                         'No image or video selected!',
                         style: TextStyle(
@@ -131,18 +128,13 @@ class _AddAnimalState extends State<AddAnimal> {
                 children: [
                   ElevatedButton(
                       //video pick button
-                      onPressed: () async {
-                        final file = await pickVideoFile();
-                        controller = VideoPlayerController.file(file)
-                          ..addListener(() => setState(() {}))
-                          ..setLooping(true)
-                          ..initialize().then((_) {
-                            controller!.play();
-                            setState(() {
-                              _file = file;
-                              _image = null;
-                            });
-                          });
+
+                      onPressed: () {
+                        setState(() {
+                          String source = 'Video';
+
+                          _cameraGalleryBottomSheet(context, source);
+                        });
                       },
                       child: Row(
                         children: [
@@ -167,9 +159,12 @@ class _AddAnimalState extends State<AddAnimal> {
                   ElevatedButton(
                       //image pick button
                       onPressed: () async {
-                        _cameraGalleryBottomSheet(context);
+                        setState(() {
+                          String source = 'Photo';
+                          _cameraGalleryBottomSheet(context, source);
+                        });
 
-                        print(_file);
+                        //  print(_file);
                       },
                       child: Row(
                         children: [
@@ -396,7 +391,7 @@ class _AddAnimalState extends State<AddAnimal> {
 
   Future<void> uploadData(String uuid, String _currentMobileNo, String username,
       String userProfileImage) async {
-    if (_image != null || _file != null) {
+    if (_image != null || fileMedia != null) {
       firebase_storage.Reference storageReference = firebase_storage
           .FirebaseStorage.instance
           .ref()
@@ -420,7 +415,7 @@ class _AddAnimalState extends State<AddAnimal> {
         });
       } else {
         firebase_storage.UploadTask storageUploadTask =
-            storageReference.putFile(_file!);
+            storageReference.putFile(fileMedia!);
 
         firebase_storage.TaskSnapshot taskSnapshot;
         storageUploadTask.then((value) {
@@ -452,18 +447,25 @@ class _AddAnimalState extends State<AddAnimal> {
       'age': _ageController.text,
       'mobile': _currentMobileNo,
       'photo': _image != null ? animalsImageLink! : '',
-      'video': _file != null ? animalsVideoLink! : '',
+      'video': fileMedia != null ? animalsVideoLink! : '',
       'date': date,
       'totalFollowings': '0',
       'totalComments': '0',
       'totalShares': '0',
       'id': uuid
     };
-    await DatabaseManager().addAnimalsData(map, _currentMobileNo).then((value) {
-      if (value) {
-        _emptyFildCreator();
-      } else {}
-    });
+    try {
+      await DatabaseManager()
+          .addAnimalsData(map, _currentMobileNo)
+          .then((value) {
+        if (value) {
+          _emptyFildCreator();
+        } else {}
+      });
+    } catch (e) {
+      print({"Error: $e"});
+    }
+
     Navigator.pop(context);
   }
 
@@ -475,53 +477,12 @@ class _AddAnimalState extends State<AddAnimal> {
     _ageController.clear();
   }
 
-  Widget buildVideo() => Stack(
-        children: <Widget>[
-          buildVideoPlayer(),
-          Positioned.fill(
-              child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => controller!.value.isPlaying
-                ? controller!.pause()
-                : controller!.play(),
-            child: Stack(
-              children: <Widget>[
-                buildPlay(),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: buildIndicator(),
-                ),
-              ],
-            ),
-          )),
-        ],
-      );
-  Widget buildPlay() => controller!.value.isPlaying
-      ? Container()
-      : Container(
-          alignment: Alignment.center,
-          color: Colors.black26,
-          child: Icon(Icons.play_arrow, color: Colors.white, size: 80),
-        );
-
-  Widget buildVideoPlayer() => AspectRatio(
-        aspectRatio: controller!.value.aspectRatio,
-        child: VideoPlayer(controller!),
-      );
-
-  Widget buildIndicator() => VideoProgressIndicator(
-        controller!,
-        allowScrubbing: true,
-      );
-
   Future<File> pickVideoFile() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.video);
     return File(result!.files.single.path.toString());
   }
 
-  void _cameraGalleryBottomSheet(BuildContext context) {
+  void _cameraGalleryBottomSheet(BuildContext context, String source) {
     Size size = MediaQuery.of(context).size;
     showModalBottomSheet(
         context: context,
@@ -538,25 +499,28 @@ class _AddAnimalState extends State<AddAnimal> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(FontAwesomeIcons.camera),
+                    leading: Icon(source == 'Photo'
+                        ? FontAwesomeIcons.camera
+                        : FontAwesomeIcons.video),
                     title: Text('Camera'),
                     onTap: () {
-                      setState(() {
-                        _getCameraImage();
-                        _file = null;
-                        Navigator.pop(context);
-                      });
+                      source == 'Photo' ? _getCameraImage() : _getCameraVideo();
+
+                      Navigator.pop(context);
+                      controller!.dispose();
                     },
                   ),
                   ListTile(
-                    leading: Icon(FontAwesomeIcons.images),
+                    leading: Icon(source == 'Photo'
+                        ? FontAwesomeIcons.images
+                        : FontAwesomeIcons.fileVideo),
                     title: Text('Gallery'),
                     onTap: () {
-                      setState(() {
-                        _getGalleryImage();
-                        _file = null;
-                        Navigator.pop(context);
-                      });
+                      source == 'Photo'
+                          ? _getGalleryImage()
+                          : _getGalleryVideo();
+                      Navigator.pop(context);
+                      controller!.dispose();
                     },
                   )
                 ],
@@ -569,6 +533,11 @@ class _AddAnimalState extends State<AddAnimal> {
   }
 
   Future _getGalleryImage() async {
+    setState(() {
+      this.fileMedia = null;
+
+      this._image = null;
+    });
     final _originalImage =
         await ImagePicker().getImage(source: ImageSource.gallery);
 
@@ -586,7 +555,29 @@ class _AddAnimalState extends State<AddAnimal> {
     }
   }
 
+  Future _getGalleryVideo() async {
+    setState(() {
+      this.fileMedia = null;
+      //   controller!.dispose();
+      _image = null;
+    });
+    final file = await pickVideoFile();
+    controller = VideoPlayerController.file(file)
+      ..addListener(() => setState(() {}))
+      ..setLooping(true)
+      ..initialize().then((_) {
+        controller!.play();
+        setState(() {
+          fileMedia = file;
+        });
+      });
+  }
+
   Future _getCameraImage() async {
+    setState(() {
+      //  controller!.dispose();
+      this._image = null;
+    });
     final _originalImage =
         await ImagePicker().getImage(source: ImageSource.camera);
 
@@ -600,6 +591,24 @@ class _AddAnimalState extends State<AddAnimal> {
         setState(() {
           _image = value;
         });
+      });
+    }
+  }
+
+  Future _getCameraVideo() async {
+    setState(() {
+      this.fileMedia = null;
+      //   controller!.dispose();
+      _image = null;
+    });
+    final getMedia = ImagePicker().getVideo;
+    final media = await getMedia(source: ImageSource.camera);
+    final file = File(media!.path);
+    if (file == null) {
+      return;
+    } else {
+      setState(() {
+        fileMedia = file;
       });
     }
   }
