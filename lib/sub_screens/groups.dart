@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pet_lover/model/group.dart';
+
 import 'package:pet_lover/model/myGroup.dart';
 import 'package:pet_lover/provider/groupProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
@@ -15,20 +17,29 @@ class Groups extends StatefulWidget {
 }
 
 class _GroupsState extends State<Groups> {
-  List<MyGroup> _myGroups = [];
+  List<MyGroup>? _myGroups;
+  List<Group>? _publicGroups;
   int count = 0;
   String? _currentMobileNo;
+
   Future _customInit(
       GroupProvider groupProvider, UserProvider userProvider) async {
     setState(() {
       count++;
     });
     _currentMobileNo = await userProvider.getCurrentMobileNo();
+    await groupProvider.publicGroupSuggessions(_currentMobileNo!).then((value) {
+      setState(() {
+        _publicGroups = groupProvider.publicGroups;
+        print('Number of public groups = ${_publicGroups!.length}');
+      });
+    });
+
     print('currentMobileNo = $_currentMobileNo');
     await groupProvider.getMyGroups(_currentMobileNo!).then((value) {
       setState(() {
         _myGroups = groupProvider.myGroups;
-        print('total my groups = ${_myGroups.length}');
+        print('total my groups = ${_myGroups!.length}');
       });
     });
   }
@@ -36,6 +47,7 @@ class _GroupsState extends State<Groups> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
@@ -56,6 +68,13 @@ class _GroupsState extends State<Groups> {
         ),
         elevation: 0.0,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => CreateGroup()));
+        },
+        child: Icon(Icons.add),
+      ),
       body: _bodyUI(context),
     );
   }
@@ -75,31 +94,6 @@ class _GroupsState extends State<Groups> {
                     size.width * .05, size.width * .03),
                 child: searchGroupField(context)),
             Padding(
-              padding: EdgeInsets.only(left: size.width * .05),
-              child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => CreateGroup()));
-                  },
-                  child: Text('CREATE GROUP'),
-                  style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(size.width * .05),
-                  )))),
-            ),
-            Container(
-              width: size.width,
-              padding: EdgeInsets.only(
-                  left: size.width * .05,
-                  right: size.width * .05,
-                  top: size.width * .02),
-              child: Divider(
-                color: Colors.grey,
-                thickness: size.width * .002,
-              ),
-            ),
-            Padding(
               padding: EdgeInsets.only(
                   left: size.width * .05,
                   top: size.width * .02,
@@ -112,57 +106,177 @@ class _GroupsState extends State<Groups> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            Expanded(
-              child: Container(
-                  width: size.width,
-                  padding: EdgeInsets.only(top: size.width * .02),
-                  child: _myGroups.length == 0
+            Container(
+                width: size.width,
+                padding: EdgeInsets.only(top: size.width * .02),
+                child: _myGroups == null
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                              width: size.width * .07,
+                              height: size.width * .07,
+                              child: CircularProgressIndicator()),
+                        ],
+                      )
+                    : _myGroups!.length == 0
+                        ? Padding(
+                            padding: EdgeInsets.only(
+                              left: size.width * .05,
+                              right: size.width * .05,
+                            ),
+                            child: Text('Currently you have no group.'),
+                          )
+                        : ListView.builder(
+                            physics: ClampingScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: _myGroups!.length,
+                            itemBuilder: (context, index) {
+                              String groupId = _myGroups![index].id!;
+                              return ListTile(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              GroupDetail(groupId: groupId)));
+                                },
+                                leading: CircleAvatar(
+                                    backgroundImage: _myGroups![index]
+                                                .groupImage ==
+                                            ''
+                                        ? AssetImage('assets/group_icon.png')
+                                        : NetworkImage(
+                                                _myGroups![index].groupImage!)
+                                            as ImageProvider,
+                                    radius: size.width * .05),
+                                title: Text(
+                                  _myGroups![index].groupName!,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: size.width * .04,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                trailing: Text(
+                                  '(${_myGroups![index].myRole})',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: size.width * .04,
+                                  ),
+                                ),
+                              );
+                            })),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: size.width * .05,
+                  top: size.width * .1,
+                  bottom: size.width * .02),
+              child: Text(
+                'Suggestions',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: size.width * .045,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+            Container(
+              width: size.width,
+              child: _publicGroups == null
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: size.width * .02,
+                          ),
+                          child: Container(
+                              width: size.width * .07,
+                              height: size.width * .07,
+                              child: CircularProgressIndicator()),
+                        ),
+                      ],
+                    )
+                  : _publicGroups!.length == 0
                       ? Padding(
                           padding: EdgeInsets.only(
                             left: size.width * .05,
                             right: size.width * .05,
                           ),
-                          child: Text('Currently you have no group.'),
+                          child:
+                              Text('Currently you have no group Suggestion.'),
                         )
                       : ListView.builder(
                           physics: ClampingScrollPhysics(),
                           shrinkWrap: true,
-                          itemCount: _myGroups.length,
+                          itemCount: _publicGroups!.length,
                           itemBuilder: (context, index) {
+                            String groupId = _publicGroups![index].id!;
                             return ListTile(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => GroupDetail()));
-                              },
-                              leading: CircleAvatar(
-                                  backgroundImage:
-                                      _myGroups[index].groupImage == ''
-                                          ? AssetImage('assets/group_icon.png')
-                                          : NetworkImage(
-                                                  _myGroups[index].groupImage!)
-                                              as ImageProvider,
-                                  radius: size.width * .05),
-                              title: Text(
-                                _myGroups[index].groupName!,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: size.width * .04,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              trailing: Text(
-                                '(${_myGroups[index].myRole})',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: size.width * .04,
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              GroupDetail(groupId: groupId)));
+                                },
+                                leading: CircleAvatar(
+                                    backgroundImage: _publicGroups![index]
+                                                .groupImage ==
+                                            ''
+                                        ? AssetImage('assets/group_icon.png')
+                                        : NetworkImage(_publicGroups![index]
+                                            .groupImage!) as ImageProvider,
+                                    radius: size.width * .05),
+                                title: Text(
+                                  _publicGroups![index].groupName!,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: size.width * .04,
+                                      fontWeight: FontWeight.w600),
                                 ),
-                              ),
-                            );
-                          })),
+                                trailing: Container(
+                                  child: TextButton(
+                                      onPressed: () {
+                                        String date = DateTime.now()
+                                            .millisecondsSinceEpoch
+                                            .toString();
+                                        setState(() {
+                                          _joinGroup(
+                                              groupProvider,
+                                              groupId,
+                                              _currentMobileNo!,
+                                              date,
+                                              userProvider);
+                                        });
+                                      },
+                                      child: Text('Join')),
+                                ));
+                          }),
             )
           ],
         ));
+  }
+
+  _joinGroup(GroupProvider groupProvider, String groupId, String mobileNo,
+      String date, UserProvider userProvider) async {
+    await groupProvider
+        .joinGroup(groupId, mobileNo, date, userProvider)
+        .then((value) {
+      _showToast(context);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => GroupDetail(groupId: groupId)));
+    });
+  }
+
+  _showToast(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text('You has been added successfully.'),
+      ),
+    );
   }
 
   Widget searchGroupField(BuildContext context) {

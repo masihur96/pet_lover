@@ -57,13 +57,13 @@ class _HomeNavState extends State<HomeNav> {
 
   Future _onRefresh(
       AnimalProvider animalProvider, UserProvider userProvider) async {
-    _animalLists.clear();
-    _customInit(animalProvider, userProvider);
+    // _animalLists.clear();
+    // _customInit(animalProvider, userProvider
+    // );
   }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
     if (_count == 0) _customInit(animalProvider, userProvider);

@@ -323,7 +323,8 @@ class _CreateGroupState extends State<CreateGroup> {
                                 _image,
                                 id,
                                 _choosenValue,
-                                _descriptionController.text);
+                                _descriptionController.text,
+                                userProvider);
                           });
                         },
                         style: ButtonStyle(
@@ -416,8 +417,9 @@ class _CreateGroupState extends State<CreateGroup> {
       File? image,
       String id,
       String privacy,
-      String description) async {
-    await groupProvider.createGroup(
-        context, groupName, currentMobileNo, image, id, privacy, description);
+      String description,
+      UserProvider userProvider) async {
+    await groupProvider.createGroup(context, groupName, currentMobileNo, image,
+        id, privacy, description, userProvider);
   }
 }

@@ -8,11 +8,11 @@ class Group {
   String? privacy;
 
   Group(
-      {this.admin,
-      this.date,
-      this.description,
-      this.groupImage,
-      this.groupName,
-      this.id,
-      this.privacy});
+      {required this.admin,
+      required this.date,
+      required this.description,
+      required this.groupImage,
+      required this.groupName,
+      required this.id,
+      required this.privacy});
 }
