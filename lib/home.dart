@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pet_lover/demo_designs/navigaitonDrawer.dart';
 import 'package:pet_lover/navigation_bar_screens/account_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/chat_nav.dart';
 import 'package:pet_lover/navigation_bar_screens/following_nav.dart';
@@ -31,21 +30,13 @@ class _HomeState extends State<Home> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        drawerEnableOpenDragGesture: false,
         resizeToAvoidBottomInset: false,
-        drawer: NavigationDrawer(),
         appBar: AppBar(
-          leading: Builder(builder: (context) {
-            return IconButton(
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                icon: Icon(
-                  Icons.menu,
-                  color: Colors.black,
-                ));
-          }),
-          title: _currentIndex == 0 ? searchBar(context) : appBarTitle(context),
+          title: Transform(
+            transform: Matrix4.translationValues(-50.0, 0.0, 0.0),
+            child:
+                _currentIndex == 0 ? searchBar(context) : appBarTitle(context),
+          ),
           backgroundColor: Colors.white,
           elevation: 0,
         ),
@@ -117,36 +108,30 @@ class _HomeState extends State<Home> {
   Widget searchBar(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return Padding(
-      padding: EdgeInsets.only(left: size.width * .04),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => SearchPage()));
-        },
-        borderRadius: BorderRadius.circular(size.width * .2),
-        child: Container(
-          width: size.width,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(size.width * .2),
-              border: Border.all(color: Colors.grey)),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .01,
-                size.width * .03, size.width * .01),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: Colors.grey, size: size.width * .06),
-                SizedBox(
-                  width: size.width * .04,
-                ),
-                Text(
-                  'Search',
-                  style:
-                      TextStyle(color: Colors.grey, fontSize: size.width * .04),
-                )
-              ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => SearchPage()));
+      },
+      borderRadius: BorderRadius.circular(size.width * .2),
+      child: Container(
+        width: size.width,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size.width * .2),
+            border: Border.all(color: Colors.grey)),
+        padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .01,
+            size.width * .03, size.width * .01),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: Colors.grey, size: size.width * .06),
+            SizedBox(
+              width: size.width * .04,
             ),
-          ),
+            Text(
+              'Search',
+              style: TextStyle(color: Colors.grey, fontSize: size.width * .04),
+            )
+          ],
         ),
       ),
     );

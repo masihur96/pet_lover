@@ -18,6 +18,8 @@ class GroupProvider extends ChangeNotifier {
   List<Group> _publicGroups = [];
   int _numbrOfGroupMembers = 0;
   List<Group> _searchedGroups = [];
+  List<Group> _allGroups = [];
+  List<Group> _allPublicGroups = [];
 
   get myGroups => _myGroups;
   get groupInfo => _groupInfo;
@@ -26,6 +28,8 @@ class GroupProvider extends ChangeNotifier {
   get publicGroups => _publicGroups;
   get numberOfGroupMembers => _numbrOfGroupMembers;
   get searchedGroups => _searchedGroups;
+  get allGroups => _allGroups;
+  get allPublicGroups => _allPublicGroups;
 
   Future<List<MyGroup>> getMyGroups(String currentMobileNo) async {
     try {
@@ -133,6 +137,7 @@ class GroupProvider extends ChangeNotifier {
       'mobileNo': currentMobileNo,
       'profileImageLink': userInfo['profileImageLink'],
       'username': userInfo['username'],
+      'memberRole': 'admin'
     });
 
     await groupCollection.set({
@@ -206,6 +211,7 @@ class GroupProvider extends ChangeNotifier {
         'mobileNo': mobileNo,
         'profileImageLink': userInfo['profileImageLink'],
         'username': userInfo['username'],
+        'memberRole': 'member'
       });
     } catch (error) {
       print('Adding member in group failed - $error');
@@ -246,6 +252,7 @@ class GroupProvider extends ChangeNotifier {
               date: element.doc['date'],
               mobileNo: element.doc['mobileNo'],
               profileImageLink: element.doc['profileImageLink'],
+              memberRole: element.doc['memberRole'],
               username: element.doc['username']);
           _members.add(member);
         });
@@ -323,11 +330,128 @@ class GroupProvider extends ChangeNotifier {
         'mobileNo': mobileNo,
         'profileImageLink': userInfo['profileImageLink'],
         'username': userInfo['username'],
+        'memberRole': 'member'
       });
     } catch (error) {
       print('Adding member in group failed - $error');
     }
   }
 
-  Future<void> searchGroup(String groupName) async {}
+  Future<void> getAllGroups() async {
+    _allGroups.clear();
+    await FirebaseFirestore.instance
+        .collection('Groups')
+        .get()
+        .then((snapshot) {
+      snapshot.docChanges.forEach((element) {
+        Group group = Group(
+            admin: element.doc['admin'],
+            date: element.doc['date'],
+            description: element.doc['description'],
+            groupImage: element.doc['groupImage'],
+            groupName: element.doc['groupName'],
+            id: element.doc['id'],
+            privacy: element.doc['privacy']);
+        _allGroups.add(group);
+      });
+    });
+  }
+
+  Future<void> getAllPublicGroups() async {
+    _allPublicGroups.clear();
+    await FirebaseFirestore.instance
+        .collection('Groups')
+        .where('privacy', isEqualTo: 'Public')
+        .get()
+        .then((snapshot) {
+      snapshot.docChanges.forEach((element) {
+        Group group = Group(
+            admin: element.doc['admin'],
+            date: element.doc['date'],
+            description: element.doc['description'],
+            groupImage: element.doc['groupImage'],
+            groupName: element.doc['groupName'],
+            id: element.doc['id'],
+            privacy: element.doc['privacy']);
+        _allPublicGroups.add(group);
+      });
+    });
+  }
+
+  Future<void> makeModerator(
+      String groupId, String memberMobileNo, UserProvider userProvider) async {
+    try {
+      Map<String, String> userInfo = {};
+      DocumentReference memberRef = FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(groupId)
+          .collection('members')
+          .doc(memberMobileNo);
+
+      DocumentReference myGroup = FirebaseFirestore.instance
+          .collection('users')
+          .doc(memberMobileNo)
+          .collection('myGroups')
+          .doc(groupId);
+
+      await myGroup.update({'myRole': 'moderator'});
+
+      await userProvider.getSpecificUserInfo(memberMobileNo).then((value) {
+        userInfo = userProvider.specificUserMap;
+      });
+
+      await memberRef.update({'memberRole': 'moderator'});
+    } catch (error) {
+      print('Failed to make moderator - $error');
+    }
+  }
+
+  Future<void> DemoteToMember(
+      String groupId, String memberMobileNo, UserProvider userProvider) async {
+    try {
+      Map<String, String> userInfo = {};
+      DocumentReference memberRef = FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(groupId)
+          .collection('members')
+          .doc(memberMobileNo);
+
+      DocumentReference myGroup = FirebaseFirestore.instance
+          .collection('users')
+          .doc(memberMobileNo)
+          .collection('myGroups')
+          .doc(groupId);
+
+      await myGroup.update({'myRole': 'member'});
+
+      await userProvider.getSpecificUserInfo(memberMobileNo).then((value) {
+        userInfo = userProvider.specificUserMap;
+      });
+
+      await memberRef.update({'memberRole': 'member'});
+    } catch (error) {
+      print('Failed to make moderator - $error');
+    }
+  }
+
+  Future<void> RemoveFromGroup(String groupId, String memberMobileNo) async {
+    try {
+      DocumentReference myGroup = FirebaseFirestore.instance
+          .collection('users')
+          .doc(memberMobileNo)
+          .collection('myGroups')
+          .doc(groupId);
+
+      DocumentReference memberRef = FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(groupId)
+          .collection('members')
+          .doc(memberMobileNo);
+
+      myGroup.delete();
+      memberRef.delete();
+    } catch (error) {
+      print('Removing member failed - $error');
+    }
+  }
 }

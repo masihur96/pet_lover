@@ -112,11 +112,10 @@ class _AccountNavState extends State<AccountNav> {
                 ],
               ),
               SizedBox(
-                height: size.width * .07,
+                height: size.width * .04,
               ),
               Container(
                   width: size.width,
-                  //color: Colors.green,
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(size.width * .04,
                         size.width * .01, size.width * .04, size.width * .01),
@@ -179,6 +178,9 @@ class _AccountNavState extends State<AccountNav> {
               ProfileOption().showOption(context, 'Add animals'),
               ProfileOption().showOption(context, 'Groups'),
               ProfileOption().showOption(context, 'My animals'),
+              ProfileOption().showOption(context, 'Update account'),
+              ProfileOption().showOption(context, 'Reset password'),
+              ProfileOption().showOption(context, 'Logout'),
             ],
           ),
         ),

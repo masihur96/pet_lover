@@ -7,6 +7,7 @@ import 'package:pet_lover/provider/userProvider.dart';
 
 import 'package:pet_lover/sub_screens/create_group.dart';
 import 'package:pet_lover/sub_screens/groupDetail.dart';
+import 'package:pet_lover/sub_screens/searchGroup.dart';
 import 'package:provider/provider.dart';
 
 class Groups extends StatefulWidget {
@@ -27,11 +28,11 @@ class _GroupsState extends State<Groups> {
     setState(() {
       count++;
     });
+
     _currentMobileNo = await userProvider.getCurrentMobileNo();
     await groupProvider.publicGroupSuggessions(_currentMobileNo!).then((value) {
       setState(() {
         _publicGroups = groupProvider.publicGroups;
-        print('Number of public groups = ${_publicGroups!.length}');
       });
     });
 
@@ -92,7 +93,14 @@ class _GroupsState extends State<Groups> {
             Container(
                 padding: EdgeInsets.fromLTRB(size.width * .05, size.width * .04,
                     size.width * .05, size.width * .03),
-                child: searchGroupField(context)),
+                child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SearchGroup()));
+                    },
+                    child: searchGroupField(context))),
             Padding(
               padding: EdgeInsets.only(
                   left: size.width * .05,
@@ -220,12 +228,13 @@ class _GroupsState extends State<Groups> {
                                               GroupDetail(groupId: groupId)));
                                 },
                                 leading: CircleAvatar(
-                                    backgroundImage: _publicGroups![index]
-                                                .groupImage ==
-                                            ''
-                                        ? AssetImage('assets/group_icon.png')
-                                        : NetworkImage(_publicGroups![index]
-                                            .groupImage!) as ImageProvider,
+                                    backgroundImage:
+                                        _publicGroups![index].groupImage == ''
+                                            ? AssetImage(
+                                                'assets/group_icon.png',
+                                              )
+                                            : NetworkImage(_publicGroups![index]
+                                                .groupImage!) as ImageProvider,
                                     radius: size.width * .05),
                                 title: Text(
                                   _publicGroups![index].groupName!,
@@ -281,51 +290,15 @@ class _GroupsState extends State<Groups> {
 
   Widget searchGroupField(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(size.width * .05),
-              color: Colors.grey[300],
-            ),
-            padding: EdgeInsets.fromLTRB(
-                0, size.width * .02, size.width * .02, size.width * .02),
-            child: TextFormField(
-              cursorColor: Colors.black,
-              decoration: InputDecoration(
-                hintText: 'Group name',
-                hintStyle: TextStyle(color: Colors.black),
-                isDense: true,
-                contentPadding: EdgeInsets.only(left: size.width * .04),
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-              ),
-            ),
-          ),
-        ),
-        SizedBox(
-          width: size.width * .02,
-        ),
-        InkWell(
-          onTap: () {},
-          child: Container(
-            padding: EdgeInsets.fromLTRB(
-              size.width * .04,
-              size.width * .02,
-              size.width * .04,
-              size.width * .02,
-            ),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(size.width * .05),
-                color: Colors.grey[300]),
-            child: Text(
-              'Search',
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-        )
-      ],
+    return Container(
+      width: size.width,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size.width * .05),
+        color: Colors.grey[300],
+      ),
+      padding: EdgeInsets.fromLTRB(size.width * .03, size.width * .025,
+          size.width * .02, size.width * .025),
+      child: Text('Search Group'),
     );
   }
 }
