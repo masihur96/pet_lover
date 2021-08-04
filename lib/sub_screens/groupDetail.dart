@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pet_lover/demo_designs/group_animal_post.dart';
 import 'package:pet_lover/demo_designs/group_menu_demo.dart';
+import 'package:pet_lover/model/animal.dart';
 import 'package:pet_lover/model/group_menu_item.dart';
+import 'package:pet_lover/model/group_post.dart';
 import 'package:pet_lover/model/member.dart';
+import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:pet_lover/provider/groupProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
 import 'package:pet_lover/sub_screens/AddPeopleInGroup.dart';
 import 'package:pet_lover/sub_screens/allGroupMembers.dart';
+import 'package:pet_lover/sub_screens/group_post_add.dart';
 import 'package:provider/provider.dart';
 
 class GroupDetail extends StatefulWidget {
@@ -32,8 +38,16 @@ class _GroupDetailState extends State<GroupDetail> {
   int _totalMembers = 0;
   bool? _isMember;
 
+  //
+
+  List<GroupPost> _groupPostLists = [];
+  ScrollController _scrollController = ScrollController();
+
+  String? finalDate;
+  Map<String, String> _currentUserInfoMap = {};
+
   Future _customInit(String groupId, GroupProvider groupProvider,
-      UserProvider userProvider) async {
+      UserProvider userProvider, AnimalProvider animalProvider) async {
     _getGroupDetail(groupId, groupProvider);
     _isMemberOrNot(groupProvider, userProvider);
     _getCurrentUserDetail(userProvider);
@@ -41,6 +55,40 @@ class _GroupDetailState extends State<GroupDetail> {
     setState(() {
       count++;
     });
+
+    await userProvider.getCurrentUserInfo().then((value) {
+      _currentUserInfoMap = userProvider.currentUserMap;
+    });
+
+    await groupProvider.getGroupPost(3, groupId).then((value) {
+      setState(() {
+        _groupPostLists = groupProvider.groupPostList;
+      });
+    });
+
+    // _scrollController.addListener(() {
+    //   if (_scrollController.offset >=
+    //       _scrollController.position.maxScrollExtent) {
+    //     print('scrolling max and getting more animals');
+    //     _getMoreAnimals(animalProvider);
+    //     print('The animal list length = ${_animalLists.length}');
+    //   }
+    // });
+  }
+
+  // _getMoreAnimals(AnimalProvider animalProvider) async {
+  //   await animalProvider.getMoreAnimals(3).then((value) {
+  //     setState(() {
+  //       _animalLists = animalProvider.animalList;
+  //     });
+  //   });
+  // }
+
+  Future _onRefresh(
+      AnimalProvider animalProvider, UserProvider userProvider) async {
+    // _animalLists.clear();
+    // _customInit(animalProvider, userProvider
+    // );
   }
 
   _isMemberOrNot(GroupProvider groupProvider, UserProvider userProvider) async {
@@ -97,168 +145,176 @@ class _GroupDetailState extends State<GroupDetail> {
     Size size = MediaQuery.of(context).size;
     final GroupProvider groupProvider = Provider.of<GroupProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
-    if (count == 0) _customInit(groupId, groupProvider, userProvider);
+    final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
+
+    if (count == 0)
+      _customInit(groupId, groupProvider, userProvider, animalProvider);
+
     return SafeArea(
       child: Container(
         width: size.width,
         height: size.height,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: size.height * .35,
-              color: Colors.grey.shade200,
-              child: Stack(
-                children: [
-                  Container(
-                    width: size.width,
-                    height: size.height * .35,
-                    child: _groupImage == ''
-                        ? Center(
-                            child: Text(
-                            _groupName,
-                            style: TextStyle(fontSize: size.width * .05),
-                          ))
-                        : Image.network(
-                            _groupImage,
-                            fit: BoxFit.fill,
-                          ),
-                  ),
-                  Positioned(
-                    top: size.width * .04,
-                    left: size.width * .04,
-                    child: InkWell(
-                      onTap: () {},
-                      radius: 10,
-                      child: Container(
-                        width: size.width * .1,
-                        height: size.width * .1,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[500],
-                        ),
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: size.width * .04,
-                    right: size.width * .04,
-                    child: InkWell(
-                      onTap: () {},
-                      radius: 10,
-                      child: Container(
-                        width: size.width * .1,
-                        height: size.width * .1,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[500],
-                        ),
-                        child: Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-                padding: EdgeInsets.only(
-                    left: size.width * .04,
-                    top: size.width * .02,
-                    bottom: size.width * .02,
-                    right: size.width * .02),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: size.height * .35,
+                color: Colors.grey.shade200,
+                child: Stack(
                   children: [
-                    Text(
-                      _groupName,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: size.width * .06),
+                    Container(
+                      width: size.width,
+                      height: size.height * .35,
+                      child: _groupImage == ''
+                          ? Center(
+                              child: Text(
+                              _groupName,
+                              style: TextStyle(fontSize: size.width * .05),
+                            ))
+                          : Image.network(
+                              _groupImage,
+                              fit: BoxFit.fill,
+                            ),
                     ),
-                    PopupMenuButton<MenuItem>(
-                        onSelected: (item) => onSelectedMenuItem(context, item),
-                        itemBuilder: (context) => [
-                              ...MenuItems.groupMenuItems
-                                  .map(buildItem)
-                                  .toList()
-                            ])
+                    Positioned(
+                      top: size.width * .04,
+                      left: size.width * .04,
+                      child: InkWell(
+                        onTap: () {},
+                        radius: 10,
+                        child: Container(
+                          width: size.width * .1,
+                          height: size.width * .1,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[500],
+                          ),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: size.width * .04,
+                      right: size.width * .04,
+                      child: InkWell(
+                        onTap: () {},
+                        radius: 10,
+                        child: Container(
+                          width: size.width * .1,
+                          height: size.width * .1,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[500],
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
-                )),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: size.width * .04, right: size.width * .04),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.security, size: size.width * .042),
-                  SizedBox(width: size.width * .01),
-                  Text(
-                    _privacy,
-                    style: TextStyle(
-                        color: Colors.black, fontSize: size.width * .04),
-                  ),
-                  SizedBox(width: size.width * .05),
-                  Icon(Icons.group, size: size.width * .042),
-                  SizedBox(width: size.width * .01),
-                  Text(
-                    _totalMembers.toString(),
-                    style: TextStyle(
-                        color: Colors.black, fontSize: size.width * .04),
-                  ),
-                  Text(
-                    _totalMembers < 2 ? ' Member' : ' Members',
-                    style: TextStyle(
-                        color: Colors.black, fontSize: size.width * .04),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: size.width * .035),
-            Container(
-              padding: EdgeInsets.only(
-                left: size.width * .04,
-                right: size.width * .04,
-              ),
-              width: size.width,
-              child: Text(
-                _description,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: size.width * .04,
                 ),
               ),
-            ),
-            SizedBox(height: size.width * .03),
-            _isMember == null
-                ? Container(
-                    width: size.width,
-                    child: Center(child: CircularProgressIndicator()))
-                : _isMember == true
-                    ? forMemberOfGroup(context)
-                    : Container(
-                        width: size.width,
-                        height: size.width * .1,
-                        padding: EdgeInsets.only(
-                            left: size.width * .04, right: size.width * .04),
-                        child: ElevatedButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Join $_groupName',
-                              style: TextStyle(
-                                fontSize: size.width * .04,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )),
-                      )
-          ],
+              Padding(
+                  padding: EdgeInsets.only(
+                      left: size.width * .04,
+                      top: size.width * .02,
+                      bottom: size.width * .02,
+                      right: size.width * .02),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _groupName,
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: size.width * .06),
+                      ),
+                      PopupMenuButton<MenuItem>(
+                          onSelected: (item) =>
+                              onSelectedMenuItem(context, item),
+                          itemBuilder: (context) => [
+                                ...MenuItems.groupMenuItems
+                                    .map(buildItem)
+                                    .toList()
+                              ])
+                    ],
+                  )),
+              Padding(
+                padding: EdgeInsets.only(
+                    left: size.width * .04, right: size.width * .04),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.security, size: size.width * .042),
+                    SizedBox(width: size.width * .01),
+                    Text(
+                      _privacy,
+                      style: TextStyle(
+                          color: Colors.black, fontSize: size.width * .04),
+                    ),
+                    SizedBox(width: size.width * .05),
+                    Icon(Icons.group, size: size.width * .042),
+                    SizedBox(width: size.width * .01),
+                    Text(
+                      _totalMembers.toString(),
+                      style: TextStyle(
+                          color: Colors.black, fontSize: size.width * .04),
+                    ),
+                    Text(
+                      _totalMembers < 2 ? ' Member' : ' Members',
+                      style: TextStyle(
+                          color: Colors.black, fontSize: size.width * .04),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: size.width * .035),
+              Container(
+                padding: EdgeInsets.only(
+                  left: size.width * .04,
+                  right: size.width * .04,
+                ),
+                width: size.width,
+                child: Text(
+                  _description,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: size.width * .04,
+                  ),
+                ),
+              ),
+              SizedBox(height: size.width * .03),
+              _isMember == null
+                  ? Container(
+                      width: size.width,
+                      child: Center(child: CircularProgressIndicator()))
+                  : _isMember == true
+                      ? forMemberOfGroup(context)
+                      : Container(
+                          width: size.width,
+                          height: size.width * .1,
+                          padding: EdgeInsets.only(
+                              left: size.width * .04, right: size.width * .04),
+                          child: ElevatedButton(
+                              onPressed: () {},
+                              child: Text(
+                                'Join $_groupName',
+                                style: TextStyle(
+                                  fontSize: size.width * .04,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )),
+                        )
+            ],
+          ),
         ),
       ),
     );
@@ -279,20 +335,36 @@ class _GroupDetailState extends State<GroupDetail> {
                       : NetworkImage(_currentUserProfileImage) as ImageProvider,
                   radius: size.width * .05,
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(left: size.width * .04),
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(size.width * .03,
-                          size.width * .02, size.width * .03, size.width * .02),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(size.width * .04),
-                        border: Border.all(color: Colors.black),
-                      ),
-                      child: Text(
-                        'Write something...',
-                        style: TextStyle(
-                          fontSize: size.width * .035,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => GroupPostAdd(groupId: groupId)),
+                    );
+                  },
+                  child: Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: size.width * .04),
+                      child: Container(
+                        width: size.width * .75,
+                        padding: EdgeInsets.fromLTRB(
+                            size.width * .03,
+                            size.width * .02,
+                            size.width * .03,
+                            size.width * .02),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(size.width * .01),
+                          border: Border.all(color: Colors.black),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Write something...',
+                            style: TextStyle(
+                              fontSize: size.width * .035,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -310,7 +382,14 @@ class _GroupDetailState extends State<GroupDetail> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                GroupPostAdd(groupId: groupId)),
+                      );
+                    },
                     child: Row(
                       children: [
                         Icon(
@@ -334,7 +413,14 @@ class _GroupDetailState extends State<GroupDetail> {
                   ),
                 ),
                 TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                GroupPostAdd(groupId: groupId)),
+                      );
+                    },
                     child: Row(
                       children: [
                         Icon(
@@ -357,6 +443,39 @@ class _GroupDetailState extends State<GroupDetail> {
               thickness: size.width * .002,
               color: Colors.grey,
               height: size.width * .01),
+          ListView.builder(
+            controller: _scrollController,
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            itemCount: _groupPostLists.length,
+            itemBuilder: (context, index) {
+              DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(_groupPostLists[index].date!));
+              var format = new DateFormat("yMMMd").add_jm();
+              finalDate = format.format(miliDate);
+
+              return GroupAnimalPost(
+                profileImageLink: _groupPostLists[index].userProfileImage!,
+                username: _groupPostLists[index].username!,
+                mobile: _groupPostLists[index].mobile!,
+                date: finalDate!,
+                numberOfLoveReacts: _groupPostLists[index].totalFollowings!,
+                numberOfComments: _groupPostLists[index].totalComments!,
+                numberOfShares: _groupPostLists[index].totalShares!,
+                petId: _groupPostLists[index].id!,
+                petName: _groupPostLists[index].petName!,
+                petColor: _groupPostLists[index].color!,
+                petGenus: _groupPostLists[index].genus!,
+                petGender: _groupPostLists[index].gender!,
+                petAge: _groupPostLists[index].age!,
+                petImage: _groupPostLists[index].photo!,
+                petVideo: _groupPostLists[index].video!,
+                currentUserImage: _currentUserInfoMap['profileImageLink']!,
+                status: _groupPostLists[index].status!,
+                groupId: _groupPostLists[index].groupId!,
+              );
+            },
+          ),
         ],
       ),
     );

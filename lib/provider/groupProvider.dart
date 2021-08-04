@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pet_lover/model/group.dart';
+import 'package:pet_lover/model/group_post.dart';
 import 'package:pet_lover/model/member.dart';
 import 'package:pet_lover/model/myGroup.dart';
 
@@ -18,6 +19,7 @@ class GroupProvider extends ChangeNotifier {
   List<Group> _publicGroups = [];
   int _numbrOfGroupMembers = 0;
   List<Group> _searchedGroups = [];
+  List<GroupPost> _groupPostList = [];
   List<Group> _allGroups = [];
   List<Group> _allPublicGroups = [];
 
@@ -28,6 +30,7 @@ class GroupProvider extends ChangeNotifier {
   get publicGroups => _publicGroups;
   get numberOfGroupMembers => _numbrOfGroupMembers;
   get searchedGroups => _searchedGroups;
+  get groupPostList => _groupPostList;
   get allGroups => _allGroups;
   get allPublicGroups => _allPublicGroups;
 
@@ -452,6 +455,54 @@ class GroupProvider extends ChangeNotifier {
       memberRef.delete();
     } catch (error) {
       print('Removing member failed - $error');
+    }
+  }
+
+  Future<List<GroupPost>> getGroupPost(int limit, String groupId) async {
+    print('getAnimals() running');
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(groupId)
+          .collection('posts')
+          .orderBy('date', descending: true)
+          .limit(limit)
+          .get();
+
+      // if (querySnapshot.docs.isNotEmpty) {
+      //   _startAfter = querySnapshot.docs.last;
+      //   print('the _startAfter value ${_startAfter!.data()}');
+      // } else {
+      //   _startAfter = null;
+      // }
+
+      _groupPostList.clear();
+      querySnapshot.docChanges.forEach((element) {
+        GroupPost groupPost = GroupPost(
+          userProfileImage: element.doc['userProfileImage'],
+          username: element.doc['username'],
+          mobile: element.doc['mobile'],
+          age: element.doc['age'],
+          color: element.doc['color'],
+          date: element.doc['date'],
+          gender: element.doc['gender'],
+          genus: element.doc['genus'],
+          id: element.doc['id'],
+          petName: element.doc['petName'],
+          photo: element.doc['photo'],
+          totalComments: element.doc['totalComments'],
+          totalFollowings: element.doc['totalFollowings'],
+          totalShares: element.doc['totalShares'],
+          video: element.doc['video'],
+          status: element.doc['status'],
+          groupId: element.doc['groupId'],
+        );
+        _groupPostList.add(groupPost);
+      });
+      return _groupPostList;
+    } catch (error) {
+      print('Error: $error');
+      return [];
     }
   }
 }

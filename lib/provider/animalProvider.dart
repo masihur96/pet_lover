@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pet_lover/model/Comment.dart';
 import 'package:pet_lover/model/animal.dart';
+import 'package:pet_lover/model/group_post.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AnimalProvider extends ChangeNotifier {
@@ -11,12 +12,14 @@ class AnimalProvider extends ChangeNotifier {
   int _numberOfComments = 0;
   int _numberOfShares = 0;
   List<Comment> _commentList = [];
+
   int documentLimit = 4;
   DocumentSnapshot? _startAfter;
   int _numberOfMyAnimals = 0;
 
   get numberOfFollowers => _numberOfFollowers;
   get animalList => _animalList;
+
   get isFollower => _isFollower;
   get commentList => _commentList;
   get numberOfComments => _numberOfComments;
@@ -385,5 +388,26 @@ class AnimalProvider extends ChangeNotifier {
     );
 
     return animal;
+  }
+
+  Future<bool> addGroupPost(Map<String, String> map, String groupId) async {
+    try {
+      String _currentMobileNo = await _getCurrentMobileNo();
+      await FirebaseFirestore.instance
+          .collection("groupPosts")
+          .doc(map['id'])
+          .set(map);
+
+      await FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(groupId)
+          .collection('posts')
+          .doc(map['id'])
+          .set(map);
+
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 }
