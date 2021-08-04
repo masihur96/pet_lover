@@ -163,6 +163,11 @@ class _AnimalPostState extends State<AnimalPost> {
     });
   }
 
+  _removeFollowing(AnimalProvider animalProvider, String currentMobileNo,
+      String mobile, String username) async {
+    await animalProvider.removeMyFollowings(currentMobileNo, mobile);
+  }
+
   @override
   Widget build(BuildContext context) {
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
@@ -240,7 +245,10 @@ class _AnimalPostState extends State<AnimalPost> {
                         animalProvider, _currentMobileNo!, mobile, username);
                   }
                   if (_isFollowed == false) {
+                    animalProvider.removeFollower(petId, _currentMobileNo!);
                     _getFollowersNumber(animalProvider, petId);
+                    _removeFollowing(
+                        animalProvider, _currentMobileNo!, mobile, username);
                   }
                 });
               },

@@ -4,6 +4,7 @@ import 'package:pet_lover/demo_designs/my_animals_menu_item_demo.dart';
 import 'package:pet_lover/model/my_animals_menu_item.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
+import 'package:pet_lover/sub_screens/addAnimal.dart';
 import 'package:pet_lover/sub_screens/commentSection.dart';
 import 'package:provider/provider.dart';
 
@@ -175,10 +176,9 @@ class _MyAnimalsDemoState extends State<MyAnimalsDemo> {
   }
 
   _deleteAnimal(AnimalProvider animalProvider) async {
-    await animalProvider.deleteAnimal(petId).then((value) {
-      _showDeleteToast(context);
+    await animalProvider.deleteAnimal(petId, petImage).then((value) {
       setState(() {
-        count = 0;
+        _showDeleteToast(context);
       });
     });
   }
@@ -507,6 +507,8 @@ class _MyAnimalsDemoState extends State<MyAnimalsDemo> {
       AnimalProvider animalProvider) {
     switch (item) {
       case MyAnimalsMenu.editAnimalPost:
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => AddAnimal(petId: petId)));
         break;
       case MyAnimalsMenu.deleteAnimalPost:
         _deleteAnimal(animalProvider);

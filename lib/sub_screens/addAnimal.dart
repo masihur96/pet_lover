@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pet_lover/custom_classes/DatabaseManager.dart';
 import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
 import 'package:pet_lover/custom_classes/progress_dialog.dart';
+import 'package:pet_lover/model/animal.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,11 +16,15 @@ import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class AddAnimal extends StatefulWidget {
+  String petId;
+  AddAnimal({Key? key, required this.petId}) : super(key: key);
   @override
-  _AddAnimalState createState() => _AddAnimalState();
+  _AddAnimalState createState() => _AddAnimalState(petId);
 }
 
 class _AddAnimalState extends State<AddAnimal> {
+  String petId;
+  _AddAnimalState(this.petId);
   TextEditingController _petNameController = TextEditingController();
   TextEditingController _colorController = TextEditingController();
   TextEditingController _genusController = TextEditingController();
@@ -47,6 +52,8 @@ class _AddAnimalState extends State<AddAnimal> {
 
   String _choosenValue = 'Male';
   List<String> _groupGender = ['Male', 'Female'];
+  Animal _animal = Animal();
+  int _count = 0;
 
   Future<String?> getCurrentMobileNo() async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,6 +67,20 @@ class _AddAnimalState extends State<AddAnimal> {
     controller?.dispose();
 
     super.dispose();
+  }
+
+  Future _customInit(AnimalProvider animalProvider) async {
+    setState(() {
+      _count++;
+      _getPetInfo(animalProvider);
+    });
+  }
+
+  _getPetInfo(AnimalProvider animalProvider) async {
+    if (petId != '') {
+      _animal = await animalProvider.getSpecificAnimal(petId);
+      print('name = ${_animal.petName}, id = ${_animal.id}');
+    }
   }
 
   @override
@@ -97,6 +118,7 @@ class _AddAnimalState extends State<AddAnimal> {
   Widget bodyUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
+    if (_count == 0) _customInit(animalProvider);
     return Container(
       width: size.width,
       height: size.height,
@@ -495,16 +517,16 @@ class _AddAnimalState extends State<AddAnimal> {
       'totalShares': '0',
       'id': uuid
     };
-    await DatabaseManager().addAnimalsData(map, _currentMobileNo).then((value) async {
+    await DatabaseManager()
+        .addAnimalsData(map, _currentMobileNo)
+        .then((value) async {
       if (value) {
         _emptyFildCreator();
         await animalProvider
-        .getMyAnimalsNumber()
-        .then((value) => Navigator.pop(context));
+            .getMyAnimalsNumber()
+            .then((value) => Navigator.pop(context));
       } else {}
     });
-
-    
   }
 
   _emptyFildCreator() {

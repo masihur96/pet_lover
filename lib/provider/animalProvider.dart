@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pet_lover/model/Comment.dart';
 import 'package:pet_lover/model/animal.dart';
@@ -14,14 +15,18 @@ class AnimalProvider extends ChangeNotifier {
   int documentLimit = 4;
   DocumentSnapshot? _startAfter;
   int _numberOfMyAnimals = 0;
+  List<Animal> _currentUserAnimals = [];
+  List<Animal> _favouriteList = [];
 
   get numberOfFollowers => _numberOfFollowers;
+  get favouriteList => _favouriteList;
   get animalList => _animalList;
   get isFollower => _isFollower;
   get commentList => _commentList;
   get numberOfComments => _numberOfComments;
   get numberOfMyAnimals => _numberOfMyAnimals;
   get numberOfShares => _numberOfShares;
+  get currentUserAnimals => _currentUserAnimals;
 
   Future<List<Animal>> getAnimals(int limit) async {
     print('getAnimals() running');
@@ -59,6 +64,7 @@ class AnimalProvider extends ChangeNotifier {
           video: element.doc['video'],
         );
         _animalList.add(animal);
+        notifyListeners();
       });
       return _animalList;
     } catch (error) {
@@ -195,12 +201,14 @@ class AnimalProvider extends ChangeNotifier {
   Future<void> myFollowings(
       String _currentMobileNo, String mobileNo, String username) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_currentMobileNo)
-          .collection('myFollowings')
-          .doc(mobileNo)
-          .set({'username': username});
+      if (mobileNo != _currentMobileNo) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_currentMobileNo)
+            .collection('myFollowings')
+            .doc(mobileNo)
+            .set({'username': username, 'mobile': mobileNo});
+      }
     } catch (error) {
       print('Cannot add in followings ... error = $error');
     }
@@ -271,7 +279,7 @@ class AnimalProvider extends ChangeNotifier {
           .orderBy('date', descending: true)
           .get();
 
-      _animalList.clear();
+      _currentUserAnimals.clear();
       querySnapshot.docChanges.forEach((element) {
         Animal animal = Animal(
           userProfileImage: element.doc['userProfileImage'],
@@ -290,7 +298,7 @@ class AnimalProvider extends ChangeNotifier {
           totalShares: element.doc['totalShares'],
           video: element.doc['video'],
         );
-        _animalList.add(animal);
+        _currentUserAnimals.add(animal);
       });
       return _animalList;
     } catch (error) {
@@ -387,8 +395,13 @@ class AnimalProvider extends ChangeNotifier {
     return animal;
   }
 
-  Future<void> deleteAnimal(String petId) async {
+  Future<void> deleteAnimal(String petId, String petImage) async {
     try {
+      if (petImage != '') {
+        Reference storageRef = FirebaseStorage.instance.refFromURL(petImage);
+        await storageRef.delete();
+      }
+
       String currentMobileNo = await _getCurrentMobileNo();
       DocumentReference animalRef =
           FirebaseFirestore.instance.collection('Animals').doc(petId);
@@ -399,10 +412,88 @@ class AnimalProvider extends ChangeNotifier {
           .collection('my_pets')
           .doc(petId);
 
-      animalRef.delete();
-      myAnimalRef.delete();
+      await animalRef.get().then((snapshot) {
+        if (snapshot.exists) {
+          animalRef.collection('followers').get().then((snapshot) {
+            for (DocumentSnapshot ds in snapshot.docs) {
+              ds.reference.delete();
+            }
+          });
+
+          animalRef.collection('comments').get().then((snapshot) {
+            for (DocumentSnapshot ds in snapshot.docs) {
+              ds.reference.delete();
+            }
+          });
+
+          animalRef.collection('sharingPersons').get().then((snapshot) {
+            for (DocumentSnapshot ds in snapshot.docs) {
+              ds.reference.delete();
+            }
+          });
+
+          animalRef.delete();
+        }
+      });
+
+      await myAnimalRef.get().then((snapshot) {
+        if (snapshot.exists) {
+          myAnimalRef.delete();
+        }
+      });
+      // notifyListeners();
+      _currentUserAnimals.removeWhere((element) => element.id == petId);
+      print('deleted animal $petId}');
     } catch (error) {
       print('Deleting animal failed - $error');
+    }
+  }
+
+  Future<void> getFavourites() async {
+    try {
+      print('getFavourite running');
+      _favouriteList.clear();
+      String currentMobileNo = await _getCurrentMobileNo();
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentMobileNo)
+          .collection('myFollowings')
+          .get()
+          .then((snapshot) async {
+        snapshot.docChanges.forEach((element) async {
+          String favouriteUser = element.doc['mobile'];
+          print('favourite users animal taking');
+          await FirebaseFirestore.instance
+              .collection('Animals')
+              .where('mobile', isEqualTo: favouriteUser)
+              .get()
+              .then((value) {
+            value.docChanges.forEach((element) {
+              Animal animal = Animal(
+                userProfileImage: element.doc['userProfileImage'],
+                username: element.doc['username'],
+                mobile: element.doc['mobile'],
+                age: element.doc['age'],
+                color: element.doc['color'],
+                date: element.doc['date'],
+                gender: element.doc['gender'],
+                genus: element.doc['genus'],
+                id: element.doc['id'],
+                petName: element.doc['petName'],
+                photo: element.doc['photo'],
+                totalComments: element.doc['totalComments'],
+                totalFollowings: element.doc['totalFollowings'],
+                totalShares: element.doc['totalShares'],
+                video: element.doc['video'],
+              );
+              _favouriteList.add(animal);
+              notifyListeners();
+            });
+          });
+        });
+      });
+    } catch (error) {
+      print('Getting favourites error - $error');
     }
   }
 }

@@ -32,7 +32,7 @@ class _MyAnimalsState extends State<MyAnimals> {
 
     await animalProvider.getCurrentUserAnimals(_currentMobileNo!).then((value) {
       setState(() {
-        _animalLists = animalProvider.animalList;
+        _animalLists = animalProvider.currentUserAnimals;
         print(
             'function _customInit() running and getting animals on homepage\nthe top animal ${_animalLists[0].petName}\nlast animal it gets ${_animalLists[_animalLists.length - 1].petName}');
       });
@@ -65,39 +65,48 @@ class _MyAnimalsState extends State<MyAnimals> {
     );
   }
 
+  Future<void> _onRefresh() async {
+    setState(() {
+      _count = 0;
+    });
+  }
+
   Widget _bodyUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
     if (_count == 0) _customInit(animalProvider, userProvider);
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      itemCount: _animalLists.length,
-      itemBuilder: (context, index) {
-        DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
-            int.parse(_animalLists[index].date!));
-        var format = new DateFormat("yMMMd").add_jm();
-        finalDate = format.format(miliDate);
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: ClampingScrollPhysics(),
+        itemCount: _animalLists.length,
+        itemBuilder: (context, index) {
+          DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+              int.parse(_animalLists[index].date!));
+          var format = new DateFormat("yMMMd").add_jm();
+          finalDate = format.format(miliDate);
 
-        return MyAnimalsDemo(
-            profileImageLink: _animalLists[index].userProfileImage!,
-            username: _animalLists[index].username!,
-            mobile: _animalLists[index].mobile!,
-            date: finalDate!,
-            numberOfLoveReacts: _animalLists[index].totalFollowings!,
-            numberOfComments: _animalLists[index].totalComments!,
-            numberOfShares: _animalLists[index].totalShares!,
-            petId: _animalLists[index].id!,
-            petName: _animalLists[index].petName!,
-            petColor: _animalLists[index].color!,
-            petGenus: _animalLists[index].genus!,
-            petGender: _animalLists[index].gender!,
-            petAge: _animalLists[index].age!,
-            petImage: _animalLists[index].photo!,
-            petVideo: _animalLists[index].video!,
-            currentUserImage: _currentUserInfoMap['profileImageLink']!);
-      },
+          return MyAnimalsDemo(
+              profileImageLink: _animalLists[index].userProfileImage!,
+              username: _animalLists[index].username!,
+              mobile: _animalLists[index].mobile!,
+              date: finalDate!,
+              numberOfLoveReacts: _animalLists[index].totalFollowings!,
+              numberOfComments: _animalLists[index].totalComments!,
+              numberOfShares: _animalLists[index].totalShares!,
+              petId: _animalLists[index].id!,
+              petName: _animalLists[index].petName!,
+              petColor: _animalLists[index].color!,
+              petGenus: _animalLists[index].genus!,
+              petGender: _animalLists[index].gender!,
+              petAge: _animalLists[index].age!,
+              petImage: _animalLists[index].photo!,
+              petVideo: _animalLists[index].video!,
+              currentUserImage: _currentUserInfoMap['profileImageLink']!);
+        },
+      ),
     );
   }
 }

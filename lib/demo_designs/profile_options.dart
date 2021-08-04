@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pet_lover/login.dart';
 import 'package:pet_lover/sub_screens/EditProfile.dart';
 import 'package:pet_lover/sub_screens/addAnimal.dart';
 import 'package:pet_lover/sub_screens/groups.dart';
@@ -53,8 +54,10 @@ class ProfileOption {
           title == 'Add animals'
               // ignore: unnecessary_statements
               ? {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => AddAnimal()))
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddAnimal(petId: '')))
                 }
               : title == 'Groups'
                   // ignore: unnecessary_statements
@@ -88,7 +91,13 @@ class ProfileOption {
                                               EditProfileUser()))
                                 }
                               // ignore: unnecessary_statements
-                              : {};
+                              : {
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Login()),
+                                      (route) => false)
+                                };
         });
   }
 }

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:pet_lover/demo_designs/animal_post.dart';
+import 'package:pet_lover/model/animal.dart';
+import 'package:pet_lover/provider/animalProvider.dart';
+import 'package:pet_lover/provider/userProvider.dart';
+import 'package:provider/provider.dart';
 
 class FollowingNav extends StatefulWidget {
   @override
@@ -7,129 +13,71 @@ class FollowingNav extends StatefulWidget {
 }
 
 class _FollowingNavState extends State<FollowingNav> {
+  int count = 0;
+  List<Animal> _favouriteList = [];
+  String? finalDate;
+  Map<String, String> _currentUserInfoMap = {};
+  String? _currentMobileNo;
+
+  Future _customInit(
+      AnimalProvider animalProvider, UserProvider userProvider) async {
+    await userProvider.getCurrentUserInfo().then((value) {
+      _currentUserInfoMap = userProvider.currentUserMap;
+      _currentMobileNo = _currentUserInfoMap['mobileNo'];
+    });
+    _getFavourites(animalProvider);
+    setState(() {
+      count++;
+    });
+  }
+
+  _getFavourites(AnimalProvider animalProvider) async {
+    await animalProvider.getFavourites().then((value) {
+      setState(() {
+        _favouriteList = animalProvider.favouriteList;
+        print('favourite list length = ${_favouriteList.length}');
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      children: [
-        posts(context),
-      ],
-    ));
+      body: _bodyUI(context),
+    );
   }
 
-  Widget posts(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      width: size.width,
-      color: Colors.white,
-      child: Column(children: [
-        Container(
-          width: size.width,
-          child: Row(
-            children: [
-              Container(
-                width: size.width * .8,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(size.width * .02,
-                      size.width * .01, size.width * .02, size.width * .01),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: size.width * .12,
-                          child: CircleAvatar(
-                            child: Icon(
-                              Icons.person,
-                            ),
-                            radius: 18,
-                          ),
-                        ),
-                        SizedBox(width: size.width * .01),
-                        Container(
-                          width: size.width * .4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Username',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '2 jun 10 2021 February 24',
-                                style: TextStyle(
-                                    //fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                        )
-                      ]),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: size.width * .02,
-        ),
-        Container(
-            width: size.width,
-            height: size.width * .7,
-            child: Image.asset(
-              'assets/dog.jpg',
-              fit: BoxFit.cover,
-            )),
-        Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.heart,
-                size: size.width * .06,
-                color: Colors.black,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .02,
-                  size.width * .02, size.width * .02),
-              child: Icon(
-                FontAwesomeIcons.comment,
-                color: Colors.black,
-                size: size.width * .06,
-              ),
-            ),
-          ],
-        ),
-        Container(
-            width: size.width,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(size.width * .02, size.width * .01,
-                  size.width * .02, size.width * .01),
-              child: Text(
-                  'Here will be the caption of photo. Here will be the caption of photo. Here will be the caption of photo.Here will be the caption of photo.Here will be the caption of photo.'),
-            )),
-        ListTile(
-          title: Text(
-            'Add comment...',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
-          ),
-          leading: CircleAvatar(
-            backgroundImage: AssetImage(
-              'assets/profile_image.jpg',
-            ),
-            radius: size.width * .04,
-          ),
-          onTap: () {},
-        ),
-        SizedBox(
-          height: size.width * .02,
-        )
-      ]),
-    );
+  Widget _bodyUI(BuildContext context) {
+    final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
+    if (count == 0) _customInit(animalProvider, userProvider);
+    return ListView.builder(
+        physics: ClampingScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: _favouriteList.length,
+        itemBuilder: (context, index) {
+          DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+              int.parse(_favouriteList[index].date!));
+          var format = new DateFormat("yMMMd").add_jm();
+          finalDate = format.format(miliDate);
+
+          return AnimalPost(
+              profileImageLink: _favouriteList[index].userProfileImage!,
+              username: _favouriteList[index].username!,
+              mobile: _favouriteList[index].mobile!,
+              date: finalDate!,
+              numberOfLoveReacts: _favouriteList[index].totalFollowings!,
+              numberOfComments: _favouriteList[index].totalComments!,
+              numberOfShares: _favouriteList[index].totalShares!,
+              petId: _favouriteList[index].id!,
+              petName: _favouriteList[index].petName!,
+              petColor: _favouriteList[index].color!,
+              petGenus: _favouriteList[index].genus!,
+              petGender: _favouriteList[index].gender!,
+              petAge: _favouriteList[index].age!,
+              petImage: _favouriteList[index].photo!,
+              petVideo: _favouriteList[index].video!,
+              currentUserImage: _currentUserInfoMap['profileImageLink']!);
+        });
   }
 }
