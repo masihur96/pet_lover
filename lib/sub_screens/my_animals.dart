@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pet_lover/demo_designs/animal_post.dart';
+
+import 'package:pet_lover/demo_designs/my_animals_demo.dart';
 import 'package:pet_lover/model/animal.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
@@ -79,7 +80,7 @@ class _MyAnimalsState extends State<MyAnimals> {
         var format = new DateFormat("yMMMd").add_jm();
         finalDate = format.format(miliDate);
 
-        return AnimalPost(
+        return MyAnimalsDemo(
             profileImageLink: _animalLists[index].userProfileImage!,
             username: _animalLists[index].username!,
             mobile: _animalLists[index].mobile!,

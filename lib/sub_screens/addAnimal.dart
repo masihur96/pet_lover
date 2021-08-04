@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pet_lover/custom_classes/DatabaseManager.dart';
 import 'package:pet_lover/custom_classes/TextFieldValidation.dart';
 import 'package:pet_lover/custom_classes/progress_dialog.dart';
+import 'package:pet_lover/provider/animalProvider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -21,7 +23,7 @@ class _AddAnimalState extends State<AddAnimal> {
   TextEditingController _petNameController = TextEditingController();
   TextEditingController _colorController = TextEditingController();
   TextEditingController _genusController = TextEditingController();
-  TextEditingController _genderController = TextEditingController();
+  // TextEditingController _genderController = TextEditingController();
   TextEditingController _ageController = TextEditingController();
 
   File? _file;
@@ -42,6 +44,9 @@ class _AddAnimalState extends State<AddAnimal> {
 
   bool profileImageUploadVisibility = false;
   VideoPlayerController? controller;
+
+  String _choosenValue = 'Male';
+  List<String> _groupGender = ['Male', 'Female'];
 
   Future<String?> getCurrentMobileNo() async {
     final prefs = await SharedPreferences.getInstance();
@@ -91,6 +96,7 @@ class _AddAnimalState extends State<AddAnimal> {
   //body demo design
   Widget bodyUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     return Container(
       width: size.width,
       height: size.height,
@@ -222,8 +228,10 @@ class _AddAnimalState extends State<AddAnimal> {
                         top: size.width * .02,
                         bottom: size.width * .02),
                     decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(color: Colors.grey)),
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(size.width * .02),
+                    ),
                     child: textFormFieldBuilder(TextInputType.text, 1,
                         _petNameController, petNameErrorText),
                   ),
@@ -246,8 +254,10 @@ class _AddAnimalState extends State<AddAnimal> {
                         top: size.width * .02,
                         bottom: size.width * .02),
                     decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(color: Colors.grey)),
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(size.width * .02),
+                    ),
                     child: textFormFieldBuilder(TextInputType.text, 1,
                         _colorController, colorErrorText),
                   ),
@@ -270,8 +280,10 @@ class _AddAnimalState extends State<AddAnimal> {
                         top: size.width * .02,
                         bottom: size.width * .02),
                     decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(color: Colors.grey)),
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(size.width * .02),
+                    ),
                     child: textFormFieldBuilder(TextInputType.text, 1,
                         _genusController, genusErrorText),
                   ),
@@ -286,19 +298,32 @@ class _AddAnimalState extends State<AddAnimal> {
                     height: size.width * .02,
                   ),
                   Container(
-                    //textformfield for gender input
-                    width: size.width,
-                    padding: EdgeInsets.only(
-                        left: size.width * .04,
-                        right: size.width * .04,
-                        top: size.width * .02,
-                        bottom: size.width * .02),
-                    decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(color: Colors.grey)),
-                    child: textFormFieldBuilder(TextInputType.text, 1,
-                        _genderController, genderErrorText),
-                  ),
+                      width: size.width,
+                      height: size.width * .095,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius:
+                              BorderRadius.circular(size.width * .02)),
+                      padding: EdgeInsets.only(
+                          left: size.width * .04, right: size.width * .04),
+                      child: Container(
+                        child: DropdownButton<String>(
+                          value: _choosenValue,
+                          isExpanded: true,
+                          underline: SizedBox(),
+                          onChanged: (value) {
+                            setState(() {
+                              _choosenValue = value.toString();
+                            });
+                          },
+                          items: _groupGender
+                              .map((item) => DropdownMenuItem<String>(
+                                    child: Text(item),
+                                    value: item,
+                                  ))
+                              .toList(),
+                        ),
+                      )),
                   SizedBox(
                     height: size.width * .04,
                   ),
@@ -318,8 +343,10 @@ class _AddAnimalState extends State<AddAnimal> {
                         top: size.width * .02,
                         bottom: size.width * .02),
                     decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(color: Colors.grey)),
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(size.width * .02),
+                    ),
                     child: textFormFieldBuilder(
                         TextInputType.text, 1, _ageController, ageErrorText),
                   ),
@@ -331,7 +358,9 @@ class _AddAnimalState extends State<AddAnimal> {
                     children: [
                       ElevatedButton(
                           //Cancel button
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                           child: Text(
                             'Cancel',
                             style: TextStyle(
@@ -359,10 +388,10 @@ class _AddAnimalState extends State<AddAnimal> {
                                   builder: (context) {
                                     return ProgressDialog(
                                         message:
-                                            'Please wait...Uploading image and saving data.');
+                                            'Please wait...Uploading file and saving animal data.');
                                   });
 
-                              _uploadData();
+                              _uploadData(animalProvider);
                             });
                           },
                           child: Text(
@@ -382,7 +411,7 @@ class _AddAnimalState extends State<AddAnimal> {
     );
   }
 
-  _uploadData() async {
+  _uploadData(AnimalProvider animalProvider) async {
     _currentMobileNo = await getCurrentMobileNo();
     String id = _petNameController.text + _currentMobileNo!;
 
@@ -391,11 +420,12 @@ class _AddAnimalState extends State<AddAnimal> {
 
     _userProfileImage = await DatabaseManager()
         .getUserInfo(_currentMobileNo!, 'profileImageLink');
-    await uploadData(id, _currentMobileNo!, _username!, _userProfileImage!);
+    await uploadData(
+        id, _currentMobileNo!, _username!, _userProfileImage!, animalProvider);
   }
 
   Future<void> uploadData(String uuid, String _currentMobileNo, String username,
-      String userProfileImage) async {
+      String userProfileImage, AnimalProvider animalProvider) async {
     if (_image != null || _file != null) {
       firebase_storage.Reference storageReference = firebase_storage
           .FirebaseStorage.instance
@@ -415,7 +445,8 @@ class _AddAnimalState extends State<AddAnimal> {
             setState(() {
               animalsImageLink = downloadUrl;
             });
-            _submitData(uuid, _currentMobileNo, username, userProfileImage);
+            _submitData(uuid, _currentMobileNo, username, userProfileImage,
+                animalProvider);
           });
         });
       } else {
@@ -430,7 +461,8 @@ class _AddAnimalState extends State<AddAnimal> {
             setState(() {
               animalsVideoLink = downloadUrl;
             });
-            _submitData(uuid, _currentMobileNo, username, userProfileImage);
+            _submitData(uuid, _currentMobileNo, username, userProfileImage,
+                animalProvider);
           });
         });
       }
@@ -439,8 +471,12 @@ class _AddAnimalState extends State<AddAnimal> {
     }
   }
 
-  Future<void> _submitData(String uuid, String _currentMobileNo,
-      String username, String userProfileImage) async {
+  Future<void> _submitData(
+      String uuid,
+      String _currentMobileNo,
+      String username,
+      String userProfileImage,
+      AnimalProvider animalProvider) async {
     String date = DateTime.now().millisecondsSinceEpoch.toString();
     Map<String, String> map = {
       'petName': _petNameController.text,
@@ -448,7 +484,7 @@ class _AddAnimalState extends State<AddAnimal> {
       'userProfileImage': userProfileImage,
       'color': _colorController.text,
       'genus': _genusController.text,
-      'gender': _genderController.text,
+      'gender': _choosenValue,
       'age': _ageController.text,
       'mobile': _currentMobileNo,
       'photo': _image != null ? animalsImageLink! : '',
@@ -459,19 +495,23 @@ class _AddAnimalState extends State<AddAnimal> {
       'totalShares': '0',
       'id': uuid
     };
-    await DatabaseManager().addAnimalsData(map, _currentMobileNo).then((value) {
+    await DatabaseManager().addAnimalsData(map, _currentMobileNo).then((value) async {
       if (value) {
         _emptyFildCreator();
+        await animalProvider
+        .getMyAnimalsNumber()
+        .then((value) => Navigator.pop(context));
       } else {}
     });
-    Navigator.pop(context);
+
+    
   }
 
   _emptyFildCreator() {
+    _image = null;
     _petNameController.clear();
     _colorController.clear();
     _genusController.clear();
-    _genderController.clear();
     _ageController.clear();
   }
 
@@ -527,7 +567,7 @@ class _AddAnimalState extends State<AddAnimal> {
         context: context,
         builder: (context) {
           return Container(
-            height: size.width * .3,
+            height: size.height * .2,
             color: Color(0xff737373),
             child: Container(
               decoration: BoxDecoration(
@@ -577,7 +617,7 @@ class _AddAnimalState extends State<AddAnimal> {
           sourcePath: _originalImage.path,
           aspectRatio: CropAspectRatio(ratioX: 1, ratioY: .7),
           androidUiSettings: AndroidUiSettings(
-            lockAspectRatio: false,
+            lockAspectRatio: true,
           )).then((value) {
         setState(() {
           _image = value;
@@ -595,7 +635,7 @@ class _AddAnimalState extends State<AddAnimal> {
           sourcePath: _originalImage.path,
           aspectRatio: CropAspectRatio(ratioX: 1, ratioY: .7),
           androidUiSettings: AndroidUiSettings(
-            lockAspectRatio: false,
+            lockAspectRatio: true,
           )).then((value) {
         setState(() {
           _image = value;

@@ -386,4 +386,23 @@ class AnimalProvider extends ChangeNotifier {
 
     return animal;
   }
+
+  Future<void> deleteAnimal(String petId) async {
+    try {
+      String currentMobileNo = await _getCurrentMobileNo();
+      DocumentReference animalRef =
+          FirebaseFirestore.instance.collection('Animals').doc(petId);
+
+      DocumentReference myAnimalRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentMobileNo)
+          .collection('my_pets')
+          .doc(petId);
+
+      animalRef.delete();
+      myAnimalRef.delete();
+    } catch (error) {
+      print('Deleting animal failed - $error');
+    }
+  }
 }
