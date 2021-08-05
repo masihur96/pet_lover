@@ -70,36 +70,38 @@ class _HomeNavState extends State<HomeNav> {
 
     return RefreshIndicator(
       onRefresh: () => _onRefresh(animalProvider, userProvider),
-      child: ListView.builder(
-        controller: _scrollController,
-        shrinkWrap: true,
-        physics: ClampingScrollPhysics(),
-        itemCount: _animalLists.length,
-        itemBuilder: (context, index) {
-          DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
-              int.parse(_animalLists[index].date!));
-          var format = new DateFormat("yMMMd").add_jm();
-          finalDate = format.format(miliDate);
+      child: _animalLists.length == 0
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              controller: _scrollController,
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              itemCount: _animalLists.length,
+              itemBuilder: (context, index) {
+                DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+                    int.parse(_animalLists[index].date!));
+                var format = new DateFormat("yMMMd").add_jm();
+                finalDate = format.format(miliDate);
 
-          return AnimalPost(
-              profileImageLink: _animalLists[index].userProfileImage!,
-              username: _animalLists[index].username!,
-              mobile: _animalLists[index].mobile!,
-              date: finalDate!,
-              numberOfLoveReacts: _animalLists[index].totalFollowings!,
-              numberOfComments: _animalLists[index].totalComments!,
-              numberOfShares: _animalLists[index].totalShares!,
-              petId: _animalLists[index].id!,
-              petName: _animalLists[index].petName!,
-              petColor: _animalLists[index].color!,
-              petGenus: _animalLists[index].genus!,
-              petGender: _animalLists[index].gender!,
-              petAge: _animalLists[index].age!,
-              petImage: _animalLists[index].photo!,
-              petVideo: _animalLists[index].video!,
-              currentUserImage: _currentUserInfoMap['profileImageLink']!);
-        },
-      ),
+                return AnimalPost(
+                    profileImageLink: _animalLists[index].userProfileImage!,
+                    username: _animalLists[index].username!,
+                    mobile: _animalLists[index].mobile!,
+                    date: finalDate!,
+                    numberOfLoveReacts: _animalLists[index].totalFollowings!,
+                    numberOfComments: _animalLists[index].totalComments!,
+                    numberOfShares: _animalLists[index].totalShares!,
+                    petId: _animalLists[index].id!,
+                    petName: _animalLists[index].petName!,
+                    petColor: _animalLists[index].color!,
+                    petGenus: _animalLists[index].genus!,
+                    petGender: _animalLists[index].gender!,
+                    petAge: _animalLists[index].age!,
+                    petImage: _animalLists[index].photo!,
+                    petVideo: _animalLists[index].video!,
+                    currentUserImage: _currentUserInfoMap['profileImageLink']!);
+              },
+            ),
     );
   }
 }

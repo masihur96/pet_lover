@@ -16,7 +16,10 @@ class AnimalProvider extends ChangeNotifier {
   DocumentSnapshot? _startAfter;
   int _numberOfMyAnimals = 0;
   List<Animal> _currentUserAnimals = [];
+  List<Animal> _otherUserAnimals = [];
   List<Animal> _favouriteList = [];
+  int _userAnimalNumber = 0;
+  int _userFollowersNumber = 0;
 
   get numberOfFollowers => _numberOfFollowers;
   get favouriteList => _favouriteList;
@@ -27,6 +30,9 @@ class AnimalProvider extends ChangeNotifier {
   get numberOfMyAnimals => _numberOfMyAnimals;
   get numberOfShares => _numberOfShares;
   get currentUserAnimals => _currentUserAnimals;
+  get otheUserAnimals => _otherUserAnimals;
+  get userAnimalNumber => _userAnimalNumber;
+  get userFollowersNumber => _userFollowersNumber;
 
   Future<List<Animal>> getAnimals(int limit) async {
     print('getAnimals() running');
@@ -140,6 +146,7 @@ class AnimalProvider extends ChangeNotifier {
           .get()
           .then((snapshot) {
         _numberOfComments = snapshot.docs.length;
+        notifyListeners();
       });
     } catch (error) {
       print('Number of followers cannot be showed - $error');
@@ -208,6 +215,15 @@ class AnimalProvider extends ChangeNotifier {
             .collection('myFollowings')
             .doc(mobileNo)
             .set({'username': username, 'mobile': mobileNo});
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(mobileNo)
+            .collection('followers')
+            .doc(_currentMobileNo)
+            .set({
+          'follower': _currentMobileNo,
+        });
       }
     } catch (error) {
       print('Cannot add in followings ... error = $error');
@@ -269,7 +285,7 @@ class AnimalProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<Animal>> getCurrentUserAnimals(String _currentMobileNo) async {
+  Future<void> getCurrentUserAnimals(String _currentMobileNo) async {
     print('getCurrentUserAnimals() running');
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -300,10 +316,44 @@ class AnimalProvider extends ChangeNotifier {
         );
         _currentUserAnimals.add(animal);
       });
-      return _animalList;
     } catch (error) {
       print('Error: $error');
-      return [];
+    }
+  }
+
+  Future<void> getOtherUserAnimals(String mobileNo) async {
+    print('getCurrentUserAnimals() running');
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(mobileNo)
+          .collection('my_pets')
+          .orderBy('date', descending: true)
+          .get();
+
+      _otherUserAnimals.clear();
+      querySnapshot.docChanges.forEach((element) {
+        Animal animal = Animal(
+          userProfileImage: element.doc['userProfileImage'],
+          username: element.doc['username'],
+          mobile: element.doc['mobile'],
+          age: element.doc['age'],
+          color: element.doc['color'],
+          date: element.doc['date'],
+          gender: element.doc['gender'],
+          genus: element.doc['genus'],
+          id: element.doc['id'],
+          petName: element.doc['petName'],
+          photo: element.doc['photo'],
+          totalComments: element.doc['totalComments'],
+          totalFollowings: element.doc['totalFollowings'],
+          totalShares: element.doc['totalShares'],
+          video: element.doc['video'],
+        );
+        _otherUserAnimals.add(animal);
+      });
+    } catch (error) {
+      print('Error: $error');
     }
   }
 
@@ -324,6 +374,30 @@ class AnimalProvider extends ChangeNotifier {
 
     if (querySnapshot.docs.isNotEmpty) {
       _numberOfMyAnimals = querySnapshot.docs.length;
+    }
+  }
+
+  Future<void> getUserAnimalsNumber(String mobileNo) async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(mobileNo)
+        .collection('my_pets')
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      _userAnimalNumber = querySnapshot.docs.length;
+    }
+  }
+
+  Future<void> getUserFollowersNumber(String mobileNo) async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(mobileNo)
+        .collection('followers')
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      _userFollowersNumber = querySnapshot.docs.length;
     }
   }
 

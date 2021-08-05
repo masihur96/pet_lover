@@ -169,18 +169,15 @@ class _CommetPageState extends State<CommetPage> {
                             String date = DateTime.now()
                                 .millisecondsSinceEpoch
                                 .toString();
-                            animalProvider
-                                .addComment(
-                                    id,
-                                    _commentId,
-                                    _commentController.text,
-                                    animalOwnerMobileNo,
-                                    _currentUserInfoMap['mobileNo']!,
-                                    date,
-                                    '')
-                                .then((value) {
-                              _commentController.clear();
-                            });
+                            _postComment(
+                                animalProvider,
+                                id,
+                                _commentId,
+                                _commentController.text,
+                                animalOwnerMobileNo,
+                                _currentUserInfoMap['mobileNo']!,
+                                date,
+                                '');
                           },
                           child: Text(
                             'Post',
@@ -198,6 +195,21 @@ class _CommetPageState extends State<CommetPage> {
         ),
       ),
     );
+  }
+
+  _postComment(
+      AnimalProvider animalProvider,
+      String petId,
+      String commentId,
+      String comment,
+      String animalOwnerMobileNo,
+      String currentUserMobileNo,
+      String date,
+      String totalLikes) async {
+    await animalProvider.addComment(petId, commentId, comment,
+        animalOwnerMobileNo, currentUserMobileNo, date, totalLikes);
+
+    _commentController.clear();
   }
 
   Widget _commentField(BuildContext context) {

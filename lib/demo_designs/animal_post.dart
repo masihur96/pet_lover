@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pet_lover/provider/animalProvider.dart';
 import 'package:pet_lover/provider/userProvider.dart';
 import 'package:pet_lover/sub_screens/commentSection.dart';
+import 'package:pet_lover/sub_screens/other_user_profile.dart';
 import 'package:provider/provider.dart';
 
 class AnimalPost extends StatefulWidget {
@@ -172,6 +173,8 @@ class _AnimalPostState extends State<AnimalPost> {
   Widget build(BuildContext context) {
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
+    // _getCommentsNumber(animalProvider, petId);
+
     if (count == 0) _customInit(userProvider, animalProvider);
 
     Size size = MediaQuery.of(context).size;
@@ -183,6 +186,13 @@ class _AnimalPostState extends State<AnimalPost> {
           height: size.width * .04,
         ),
         ListTile(
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => OtherUserProfile(
+                        userMobileNo: mobile, username: username)));
+          },
           leading: CircleAvatar(
             backgroundImage: profileImageLink == ''
                 ? AssetImage('assets/profile_image_demo.png')

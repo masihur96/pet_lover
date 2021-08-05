@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pet_lover/demo_designs/animal_post.dart';
 import 'package:pet_lover/model/animal.dart';
@@ -51,33 +50,35 @@ class _FollowingNavState extends State<FollowingNav> {
     final AnimalProvider animalProvider = Provider.of<AnimalProvider>(context);
     final UserProvider userProvider = Provider.of<UserProvider>(context);
     if (count == 0) _customInit(animalProvider, userProvider);
-    return ListView.builder(
-        physics: ClampingScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: _favouriteList.length,
-        itemBuilder: (context, index) {
-          DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
-              int.parse(_favouriteList[index].date!));
-          var format = new DateFormat("yMMMd").add_jm();
-          finalDate = format.format(miliDate);
+    return _favouriteList.length == 0
+        ? Center(child: CircularProgressIndicator())
+        : ListView.builder(
+            physics: ClampingScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: _favouriteList.length,
+            itemBuilder: (context, index) {
+              DateTime miliDate = new DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(_favouriteList[index].date!));
+              var format = new DateFormat("yMMMd").add_jm();
+              finalDate = format.format(miliDate);
 
-          return AnimalPost(
-              profileImageLink: _favouriteList[index].userProfileImage!,
-              username: _favouriteList[index].username!,
-              mobile: _favouriteList[index].mobile!,
-              date: finalDate!,
-              numberOfLoveReacts: _favouriteList[index].totalFollowings!,
-              numberOfComments: _favouriteList[index].totalComments!,
-              numberOfShares: _favouriteList[index].totalShares!,
-              petId: _favouriteList[index].id!,
-              petName: _favouriteList[index].petName!,
-              petColor: _favouriteList[index].color!,
-              petGenus: _favouriteList[index].genus!,
-              petGender: _favouriteList[index].gender!,
-              petAge: _favouriteList[index].age!,
-              petImage: _favouriteList[index].photo!,
-              petVideo: _favouriteList[index].video!,
-              currentUserImage: _currentUserInfoMap['profileImageLink']!);
-        });
+              return AnimalPost(
+                  profileImageLink: _favouriteList[index].userProfileImage!,
+                  username: _favouriteList[index].username!,
+                  mobile: _favouriteList[index].mobile!,
+                  date: finalDate!,
+                  numberOfLoveReacts: _favouriteList[index].totalFollowings!,
+                  numberOfComments: _favouriteList[index].totalComments!,
+                  numberOfShares: _favouriteList[index].totalShares!,
+                  petId: _favouriteList[index].id!,
+                  petName: _favouriteList[index].petName!,
+                  petColor: _favouriteList[index].color!,
+                  petGenus: _favouriteList[index].genus!,
+                  petGender: _favouriteList[index].gender!,
+                  petAge: _favouriteList[index].age!,
+                  petImage: _favouriteList[index].photo!,
+                  petVideo: _favouriteList[index].video!,
+                  currentUserImage: _currentUserInfoMap['profileImageLink']!);
+            });
   }
 }
